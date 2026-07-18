@@ -1,0 +1,6 @@
+node_modules/
+server/data/
+app/.expo/
+app/dist/
+app/web-build/
+*.log
