@@ -52,6 +52,25 @@ Runde 1 (Multi-Agent, Backend-Dimension) + Runde 2 (Selbst-Review UX/Logik/Front
 | 12 | Chat pro Serie statt pro Event-Instanz | ⚪ Bewusst: Prototyp setzt Serien-Chat voraus (dokumentiert in README) |
 | 13 | Filter-Chips 36 px statt 44-px-Touchtarget | ⚪ Bewusst: Prototyp-Maße sind die Referenz |
 
+## Runde 3 (maschineller Logik-Reviewer)
+
+| # | Befund | Status |
+|---|---|---|
+| 14 | Host-No-Show revertierte den Host-Bonus nicht (netto −9 statt −11) | ✅ Fix in `logic/noshow.js` |
+| 15 | Feedback (inkl. No-Show-Strafe) für per host-cancel abgesagte Events möglich | ✅ Fix: 409 bei `status='cancelled'` |
+| 16 | Teilnehmer-Absage von abgesagtem/beendetem Event kostete −3 | ✅ Fix: straffreier Austritt bzw. 409 |
+| 17 | Skill-Matching hatte keine Testabdeckung | ✅ 6 neue Assertions |
+| 18 | Recurrence nicht DST-fest (ms-Addition verschob lokale Uhrzeit) | ✅ Fix: Kalenderarithmetik + Test |
+| 19 | Host-Absage < 24 h ohne −3 (Timewaster-Schlupfloch) | ✅ Fix: 24-h-Regel gilt auch für Hosts |
+| 20 | Tick nicht transaktional (Host-Bonus bei Crash doppelbar) | ✅ Fix: BEGIN/COMMIT je Event |
+| 21 | Toter Code `buildNextInstance` mit irreführendem Kommentar | ✅ Entfernt |
+| 22 | Exakte Grenzwerte ungetestet (24 h, Score 80, Fenster-Kanten, Radius-Default) | ✅ 4 neue Tests |
+| 23 | Fehlende Tests: Downtime-Catch-up, No-Show vor Tick, Host-No-Show | ✅ 3 neue Tests |
+
+Testsuite nach Runde 3: **26/26 grün**; Routen-Fixes zusätzlich per Live-API
+verifiziert (Host-Late-Cancel 96→93, Austritt aus abgesagtem Event delta 0,
+Feedback auf abgesagtes Event 409).
+
 ## Offen / außerhalb der Demo-Reife
 
 Siehe `docs/launch-checklist.md` — echte Auth, PostGIS/Supabase, FCM/APNs,

@@ -14,14 +14,17 @@ export function confirmNoShow(db, event, aboutUserId) {
   const part = db
     .prepare('SELECT * FROM participations WHERE eventId = ? AND userId = ?')
     .get(event.id, aboutUserId);
-  const wasAttended = part?.status === 'attended';
+  // Bonus wurde vergeben, wenn der Tick das Treffen abgeschlossen hat:
+  // Teilnehmer → Teilnahme 'attended'; Host (ohne Teilnahme-Zeile) → Event 'past'.
+  const isHost = event.hostId === aboutUserId;
+  const bonusGiven = part?.status === 'attended' || (isHost && event.status === 'past');
   const user = db.prepare('SELECT * FROM users WHERE id = ?').get(aboutUserId);
   const newScore = clampScore(
-    user.reliabilityScore - NO_SHOW_PENALTY - (wasAttended ? ATTEND_BONUS : 0)
+    user.reliabilityScore - NO_SHOW_PENALTY - (bonusGiven ? ATTEND_BONUS : 0)
   );
   db.prepare(`UPDATE users SET reliabilityScore = ?, noShowCount = noShowCount + 1,
       meetingsAttended = MAX(0, meetingsAttended - ?) WHERE id = ?`)
-    .run(newScore, wasAttended ? 1 : 0, aboutUserId);
+    .run(newScore, bonusGiven ? 1 : 0, aboutUserId);
   if (part) {
     db.prepare(`UPDATE participations SET status = 'no_show' WHERE eventId = ? AND userId = ?`)
       .run(event.id, aboutUserId);

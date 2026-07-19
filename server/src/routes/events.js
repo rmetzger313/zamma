@@ -126,8 +126,10 @@ export function eventsRouter(db, notify) {
     res.json(serializeEvent(fresh, eventCtx(db, fresh, req.userId, nowMs)));
   });
 
-  // Host sagt sein Event ab → Status 'cancelled', Gruppe wird benachrichtigt
+  // Host sagt sein Event ab → Status 'cancelled', Gruppe wird benachrichtigt.
+  // Die 24-h-Regel gilt auch für Hosts (Spec kennt keine Host-Ausnahme).
   r.post('/:id/host-cancel', (req, res) => {
+    const nowMs = Date.now();
     const event = getEvent(db, req.params.id);
     if (!event) return res.status(404).json({ error: 'Event nicht gefunden' });
     if (event.hostId !== req.userId) return res.status(403).json({ error: 'Nur der Host kann das Event absagen' });
@@ -135,12 +137,18 @@ export function eventsRouter(db, notify) {
       return res.status(409).json({ error: 'Event ist bereits vorbei oder abgesagt' });
     db.prepare("UPDATE events SET status = 'cancelled' WHERE id = ?").run(event.id);
     const me = getUser(db, req.userId);
+    const late = isLateCancel(event.datetime, nowMs);
+    let score = me.reliabilityScore;
+    if (late) {
+      score = applyLateCancel(score);
+      db.prepare('UPDATE users SET reliabilityScore = ? WHERE id = ?').run(score, req.userId);
+    }
     const members = db.prepare('SELECT userId FROM chat_members WHERE seriesId = ? AND userId != ?')
       .all(event.seriesId, req.userId);
     for (const m of members) {
       notify(db, m.userId, 'cancel', { eventId: event.id, title: event.title, user: me.name, byHost: true });
     }
-    res.json({ ok: true });
+    res.json({ ok: true, score: { current: score, delta: me.reliabilityScore - score, late } });
   });
 
   // Vorschau fürs Absage-Modal: "Dein Score: 96 % → 93 %"
@@ -158,6 +166,18 @@ export function eventsRouter(db, notify) {
     if (!event) return res.status(404).json({ error: 'Event nicht gefunden' });
     const part = getMyParticipation(db, event.id, req.userId);
     if (part?.status !== 'joined') return res.status(409).json({ error: 'Du bist nicht angemeldet' });
+    if (event.status === 'cancelled') {
+      // Der Host hat bereits abgesagt — Austritt kostet keinen Score
+      db.prepare("UPDATE participations SET status = 'cancelled', cancelledAt = ? WHERE userId = ? AND eventId = ?")
+        .run(new Date(nowMs).toISOString(), req.userId, event.id);
+      const me0 = getUser(db, req.userId);
+      return res.json({
+        event: serializeEvent(event, eventCtx(db, event, req.userId, nowMs)),
+        score: { current: me0.reliabilityScore, delta: 0, late: false },
+      });
+    }
+    if (event.status === 'past' || eventEndMs(event) <= nowMs)
+      return res.status(409).json({ error: 'Das Treffen ist bereits vorbei' });
 
     db.prepare("UPDATE participations SET status = 'cancelled', cancelledAt = ? WHERE userId = ? AND eventId = ?")
       .run(new Date(nowMs).toISOString(), req.userId, event.id);

@@ -64,6 +64,8 @@ export function feedbackRouter(db, notify) {
     const event = eventId && getEvent(db, eventId);
     if (!event) return res.status(404).json({ error: 'Event nicht gefunden' });
 
+    if (event.status === 'cancelled')
+      return res.status(409).json({ error: 'Abgesagte Treffen können nicht bewertet werden' });
     const windowState = feedbackWindowState(event, nowMs);
     if (windowState === 'not_open')
       return res.status(409).json({ error: 'Feedback ist erst nach dem Treffen möglich' });

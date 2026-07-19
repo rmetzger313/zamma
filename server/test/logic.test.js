@@ -11,6 +11,7 @@ import { openDb } from '../src/db.js';
 import { seed } from '../src/seed.js';
 import { runTick, ensureNextInstance } from '../src/logic/tick.js';
 import { confirmNoShow } from '../src/logic/noshow.js';
+import { matchesUser } from '../src/serialize.js';
 
 const H = 3600000, D = 24 * H;
 
@@ -117,6 +118,48 @@ test('Feed-Sortierung: unverifiziert oder Score < 80 wird nachrangig', () => {
   assert.equal(isDemoted({ ...good, reliabilityScore: 79 }), true);
 });
 
+// ── Skill-Matching („Passt zu dir") ──────────────────────────────────────
+test('Skill-Matching: "Alle Level" matcht immer, sonst exakter Level in der Kategorie', () => {
+  const spiele2 = { category: 'spiele', skillLevel: 2 };
+  assert.equal(matchesUser({ category: 'sport', skillLevel: 1 }, []), true); // Alle Level
+  assert.equal(matchesUser(spiele2, [{ hobby: 'Schafkopf', skillLevel: 2 }]), true);
+  assert.equal(matchesUser(spiele2, [{ hobby: 'Schafkopf', skillLevel: 3 }]), false); // Level-Mismatch
+  assert.equal(matchesUser(spiele2, [{ hobby: 'Laufen', skillLevel: 2 }]), false); // Kategorie-Mismatch
+  assert.equal(matchesUser(spiele2, [{ hobby: 'Curling', skillLevel: 2 }]), false); // unbekanntes Hobby
+  assert.equal(matchesUser(spiele2, []), false);
+});
+
+// ── Exakte Grenzwerte ────────────────────────────────────────────────────
+test('Grenzwerte: genau 24 h ist NICHT kurzfristig, Score genau 80 NICHT nachrangig', () => {
+  const now = Date.parse('2026-07-18T12:00:00Z');
+  assert.equal(isLateCancel(new Date(now + 24 * H).toISOString(), now), false);
+  const user = { verifiedPhone: 1, verifiedId: 1, meetingsAttended: 14, noShowCount: 0, reliabilityScore: 80 };
+  assert.equal(isDemoted(user), false);
+});
+
+test('Grenzwerte: Feedback-Fenster genau bei Ende offen, genau bei Ende+7 Tage noch offen', () => {
+  const event = { datetime: '2026-07-17T17:00:00.000Z', durationMin: 120 };
+  const end = Date.parse('2026-07-17T19:00:00.000Z');
+  assert.equal(feedbackWindowState(event, end), 'open');
+  assert.equal(feedbackWindowState(event, end + 7 * D), 'open');
+  assert.equal(feedbackWindowState(event, end + 7 * D + 1), 'closed');
+});
+
+test('Umkreis: ohne radiusKm greift der 25-km-Default', () => {
+  const loc = [{ name: 'X', lat: 48.0, lng: 11.5 }]; // kein radiusKm
+  assert.ok(matchLocations(loc, 48.18, 11.5)); // ~20 km
+  assert.equal(matchLocations(loc, 48.27, 11.5), null); // ~30 km
+});
+
+// ── Recurrence: DST-fest ─────────────────────────────────────────────────
+test('Recurrence: lokale Uhrzeit bleibt über die Zeitumstellung stabil', () => {
+  // Sa 24.10.2026 09:00 lokal → +7 Tage überquert (in DST-Zonen) das Ende der Sommerzeit
+  const start = new Date(2026, 9, 24, 9, 0, 0, 0);
+  const next = new Date(nextOccurrence(start.toISOString(), 'weekly'));
+  assert.equal(next.getHours(), 9);
+  assert.equal(next.getDay(), start.getDay());
+});
+
 // ── Tick: Attend-Bonus + nächste Instanz (Integration, In-Memory-DB) ─────
 test('Tick: beendetes Event → attended (+1), Recurrence erzeugt Folge-Instanz', () => {
   const db = openDb(':memory:');
@@ -178,6 +221,48 @@ test('No-Show-Bestätigung: einmalig pro Event+Nutzer, revertiert Attend-Bonus',
   const unchanged = db.prepare("SELECT * FROM users WHERE id = 'u_kurt'").get();
   assert.equal(unchanged.reliabilityScore, after.reliabilityScore);
   assert.equal(unchanged.noShowCount, after.noShowCount);
+});
+
+test('No-Show des HOSTS: revertiert dessen Bonus (−10 −1, Treffen-Zähler −1)', () => {
+  const db = openDb(':memory:');
+  seed(db);
+  const event = db.prepare("SELECT * FROM events WHERE id = 'evt_bsa_past'").get();
+  const before = db.prepare("SELECT * FROM users WHERE id = 'u_helga'").get();
+  const r = confirmNoShow(db, event, 'u_helga'); // Helga ist Host, Event ist 'past'
+  assert.equal(r.applied, true);
+  const after = db.prepare("SELECT * FROM users WHERE id = 'u_helga'").get();
+  assert.equal(after.reliabilityScore, Math.max(0, before.reliabilityScore - 11));
+  assert.equal(after.meetingsAttended, before.meetingsAttended - 1);
+  assert.equal(after.noShowCount, before.noShowCount + 1);
+});
+
+test('No-Show VOR dem Tick (Teilnahme noch joined): nur −10, kein Bonus-Revert', () => {
+  const db = openDb(':memory:');
+  seed(db);
+  db.prepare("UPDATE participations SET status = 'joined' WHERE eventId = 'evt_bsa_past' AND userId = 'u_kurt'").run();
+  const before = db.prepare("SELECT * FROM users WHERE id = 'u_kurt'").get();
+  confirmNoShow(db, db.prepare("SELECT * FROM events WHERE id = 'evt_bsa_past'").get(), 'u_kurt');
+  const after = db.prepare("SELECT * FROM users WHERE id = 'u_kurt'").get();
+  assert.equal(after.reliabilityScore, before.reliabilityScore - 10);
+  assert.equal(after.meetingsAttended, before.meetingsAttended); // kein Bonus vergeben → kein Revert
+  // Teilnahme steht auf no_show → der Tick vergibt später auch keinen Bonus mehr
+  const part = db.prepare("SELECT status FROM participations WHERE eventId = 'evt_bsa_past' AND userId = 'u_kurt'").get();
+  assert.equal(part.status, 'no_show');
+});
+
+test('Recurrence: Catch-up nach Downtime überspringt verpasste Termine', () => {
+  const db = openDb(':memory:');
+  seed(db);
+  const now = Date.now();
+  // Serie 3 Wochen in der Vergangenheit "einfrieren"
+  const old = new Date(now - 21 * D).toISOString();
+  db.prepare("UPDATE events SET datetime = ?, status = 'past' WHERE seriesId = 'ser_lauf'").run(old);
+  const event = db.prepare("SELECT * FROM events WHERE seriesId = 'ser_lauf' LIMIT 1").get();
+  const created = ensureNextInstance(db, event, now);
+  assert.ok(created, 'keine Folge-Instanz erzeugt');
+  const dt = new Date(created.datetime).getTime();
+  assert.ok(dt > now, 'Folge-Instanz liegt nicht in der Zukunft');
+  assert.ok(dt <= now + 7 * D, 'Folge-Instanz liegt mehr als eine Woche voraus');
 });
 
 test('Tick: Host erhält bei Event-Ende ebenfalls +1 und Treffen-Zähler', () => {

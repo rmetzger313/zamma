@@ -19,22 +19,31 @@ export function runTick(db, nowMs, notify = () => {}) {
     .filter((e) => eventEndMs(e) <= nowMs);
 
   for (const event of ended) {
-    const joined = db
-      .prepare("SELECT * FROM participations WHERE eventId = ? AND status = 'joined'")
-      .all(event.id);
-    for (const p of joined) {
-      db.prepare("UPDATE participations SET status = 'attended' WHERE userId = ? AND eventId = ?")
-        .run(p.userId, event.id);
-      const user = db.prepare('SELECT * FROM users WHERE id = ?').get(p.userId);
+    // Transaktional: Boni + Status-Wechsel atomar, sonst könnte ein Crash
+    // zwischen Host-Bonus und 'past'-Update den Bonus beim Neustart doppeln.
+    db.exec('BEGIN');
+    try {
+      const joined = db
+        .prepare("SELECT * FROM participations WHERE eventId = ? AND status = 'joined'")
+        .all(event.id);
+      for (const p of joined) {
+        db.prepare("UPDATE participations SET status = 'attended' WHERE userId = ? AND eventId = ?")
+          .run(p.userId, event.id);
+        const user = db.prepare('SELECT * FROM users WHERE id = ?').get(p.userId);
+        db.prepare('UPDATE users SET reliabilityScore = ?, meetingsAttended = meetingsAttended + 1 WHERE id = ?')
+          .run(applyAttend(user.reliabilityScore), p.userId);
+      }
+      // Der Host zählt überall als Teilnehmer (joinedCount) — erfolgreiches
+      // Treffen gibt ihm denselben +1-Bonus und Treffen-Zähler.
+      const host = db.prepare('SELECT * FROM users WHERE id = ?').get(event.hostId);
       db.prepare('UPDATE users SET reliabilityScore = ?, meetingsAttended = meetingsAttended + 1 WHERE id = ?')
-        .run(applyAttend(user.reliabilityScore), p.userId);
+        .run(applyAttend(host.reliabilityScore), event.hostId);
+      db.prepare("UPDATE events SET status = 'past' WHERE id = ?").run(event.id);
+      db.exec('COMMIT');
+    } catch (e) {
+      db.exec('ROLLBACK');
+      throw e;
     }
-    // Der Host zählt überall als Teilnehmer (joinedCount) — erfolgreiches
-    // Treffen gibt ihm denselben +1-Bonus und Treffen-Zähler.
-    const host = db.prepare('SELECT * FROM users WHERE id = ?').get(event.hostId);
-    db.prepare('UPDATE users SET reliabilityScore = ?, meetingsAttended = meetingsAttended + 1 WHERE id = ?')
-      .run(applyAttend(host.reliabilityScore), event.hostId);
-    db.prepare("UPDATE events SET status = 'past' WHERE id = ?").run(event.id);
 
     if (event.recurrence) ensureNextInstance(db, event, nowMs);
   }
