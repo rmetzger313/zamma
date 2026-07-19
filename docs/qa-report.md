@@ -28,8 +28,9 @@ WebSocket ohne Reload**) → Erstellen (Titel-Validierung, deutsches
 Freitext-Datum, neue Card oben, „↻ Jeden Samstag") → Profil (Live-Score,
 Feedback-Liste) → Verifizierung (3 Stufen, Regel-Box).
 
-Hinweis: Screenshot-Capture der Browser-Umgebung war in der Session defekt —
-Verifikation lief über DOM-Text/-Zustände und API-Antworten.
+Visuelle Evidenz: `docs/screens/01…12-*.png` — per Playwright-Klickdurchlauf
+(echte Input-Events, 390×844 @2x) aufgenommen; der fehlerfreie Durchlauf selbst
+ist zugleich ein End-to-End-Beleg für alle Navigationspfade.
 
 ## Review-Befunde und Status
 
