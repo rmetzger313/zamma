@@ -50,7 +50,47 @@ export function verificationSteps(db, user) {
   ];
 }
 
-export function usersRouter(db) {
+// Konto löschen: eigene Inhalte werden entfernt, das Profil anonymisiert
+// (Event-Historie bleibt referenzintakt), zukünftige gehostete Events werden
+// abgesagt und die Gruppen benachrichtigt.
+export function deleteAccount(db, userId, notify = () => {}) {
+  const me = getUser(db, userId);
+  db.exec('BEGIN');
+  let hosted;
+  try {
+    hosted = db
+      .prepare("SELECT * FROM events WHERE hostId = ? AND status IN ('open','full')")
+      .all(userId);
+    for (const event of hosted) {
+      db.prepare("UPDATE events SET status = 'cancelled' WHERE id = ?").run(event.id);
+    }
+    db.prepare('DELETE FROM chat_messages WHERE userId = ?').run(userId);
+    db.prepare('DELETE FROM chat_members WHERE userId = ?').run(userId);
+    db.prepare('DELETE FROM participations WHERE userId = ?').run(userId);
+    db.prepare('DELETE FROM feedback WHERE fromUserId = ? OR aboutUserId = ?').run(userId, userId);
+    db.prepare('DELETE FROM notifications WHERE userId = ?').run(userId);
+    db.prepare('DELETE FROM user_hobbies WHERE userId = ?').run(userId);
+    db.prepare('DELETE FROM user_locations WHERE userId = ?').run(userId);
+    db.prepare(`UPDATE users SET name = 'Gelöschtes Profil', avatarColor = '#a99a85',
+        city = NULL, lat = NULL, lng = NULL, bio = NULL, photo = NULL,
+        verifiedPhone = 0, verifiedPhoneAt = NULL, verifiedId = 0, verifiedIdAt = NULL,
+        avgRating = NULL WHERE id = ?`).run(userId);
+    db.exec('COMMIT');
+  } catch (e) {
+    db.exec('ROLLBACK');
+    throw e;
+  }
+  // Benachrichtigungen erst nach dem Commit (kein Push bei Rollback)
+  for (const event of hosted) {
+    const members = db.prepare('SELECT userId FROM chat_members WHERE seriesId = ? AND userId != ?')
+      .all(event.seriesId, userId);
+    for (const m of members) {
+      notify(db, m.userId, 'cancel', { eventId: event.id, title: event.title, user: me.name, byHost: true });
+    }
+  }
+}
+
+export function usersRouter(db, notify = () => {}) {
   const r = Router();
 
   r.get('/me', (req, res) => {
@@ -79,6 +119,14 @@ export function usersRouter(db) {
     db.prepare('DELETE FROM user_hobbies WHERE userId = ?').run(req.userId);
     const ins = db.prepare('INSERT OR IGNORE INTO user_hobbies (userId, hobby, skillLevel) VALUES (?, ?, ?)');
     for (const { name, skillLevel } of parsed) ins.run(req.userId, name.trim(), skillLevel);
+    res.json({ ok: true });
+  });
+
+  // Konto löschen (DSGVO/Store-Anforderung)
+  r.delete('/me', (req, res) => {
+    const me = getUser(db, req.userId);
+    if (!me) return res.status(404).json({ error: 'Nutzer nicht gefunden' });
+    deleteAccount(db, req.userId, notify);
     res.json({ ok: true });
   });
 

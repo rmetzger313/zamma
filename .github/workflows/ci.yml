@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  server-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+      - name: Install server deps
+        working-directory: server
+        run: npm ci
+      - name: Logik-Tests (Score, Geo, Recurrence, Feedback, Verifizierung, Tick)
+        working-directory: server
+        run: node --test test/logic.test.js
+
+  web-export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+      - name: Install app deps
+        working-directory: app
+        run: npm ci
+      - name: Produktions-Export (Web)
+        working-directory: app
+        run: npx expo export --platform web

@@ -23,7 +23,10 @@ cd app && npm install && npm run web        # oder: npm start für iOS/Android
 ```
 
 Tests: `cd server && npm test` (Logikregeln: Score, Geo, Recurrence,
-Feedback-Fenster, Verifizierung, Tick-Integration).
+Feedback-Fenster, Verifizierung, Tick-Integration, Rate-Limit, Konto-Löschung).
+E2E-Klickdurchlauf: `cd e2e && npm install && npm run e2e` (beide Server müssen
+laufen, Demo-DB frisch — erzeugt Screenshots in `docs/screens/`). CI:
+`.github/workflows/ci.yml` (Server-Tests + Web-Export).
 
 Demo-Login: fester Nutzer `u_anna` (Header `X-User-Id`; Produktion: echte Auth).
 Native Builds erreichen die API über `EXPO_PUBLIC_API_URL`.
@@ -56,7 +59,9 @@ Tab-Bar auf allen Screens außer Onboarding, Thread, Feedback (laut Handoff).
 `GET /api/events/:id/cancel-preview`, `GET /api/feedback/pending`, `POST /api/feedback`,
 `GET /api/chats`, `GET/POST /api/chats/:seriesId/messages`, `GET /api/users/me`,
 `PUT /api/users/me/hobbies`, `GET /api/verification`, `POST /api/verification/...`,
+`DELETE /api/users/me` (Konto-Löschung: anonymisiert + räumt Inhalte),
 `GET /api/notifications`, WebSocket `/ws?userId=` (Chat live + Push-Stub).
+Alle Endpunkte hinter einem einfachen Rate-Limit (240 Req/Min pro IP).
 
 ## Bewusste Entscheidungen
 

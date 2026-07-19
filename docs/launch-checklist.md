@@ -22,11 +22,11 @@ Stand: App + Backend lauffähig und getestet (Demo-Reife). Alles Folgende brauch
 - [ ] TestFlight / Play Internal Testing mit 5–10 echten Geräten vor Public Release.
 
 ## 3. Produkt-Härtung vor echten Nutzern
-- [ ] Rate-Limiting + Input-Sanitizing am API-Gateway.
+- [x] Rate-Limiting (in-memory, 240 Req/Min pro IP) — in Produktion auf Gateway/Redis heben.
 - [ ] Moderation: Melden-Funktion für Events/Nachrichten, Block-Funktion.
-- [ ] Konto-Löschung (Store-Pflicht) + Datenexport.
+- [x] Konto-Löschung (`DELETE /api/users/me`: anonymisiert, räumt Inhalte, sagt gehostete Events ab) — [ ] Datenexport fehlt noch.
 - [ ] Echte Karte (react-native-maps + OSM/Mapbox-Token) statt Demo-Illustration.
-- [ ] E2E-Smoke-Tests (Maestro/Detox) für Join/Absage/Feedback auf echten Builds.
+- [x] E2E-Klickdurchlauf (Playwright, `e2e/`) für Web — [ ] zusätzlich Maestro/Detox auf echten Geräte-Builds.
 
 ## 4. Launch-Betrieb (Woche 1)
 - [ ] Seed-Events kuratieren: 10–15 echte Treffen in München + Waldkraiburg vor Launch anlegen

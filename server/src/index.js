@@ -5,6 +5,7 @@ import { WebSocketServer } from 'ws';
 import { openDb, makeId } from './db.js';
 import { seedIfEmpty } from './seed.js';
 import { runTick } from './logic/tick.js';
+import { createRateLimiter } from './logic/ratelimit.js';
 import { eventsRouter } from './routes/events.js';
 import { feedbackRouter } from './routes/feedback.js';
 import { chatsRouter } from './routes/chats.js';
@@ -36,6 +37,14 @@ function notify(db_, userId, type, payload, createdAt = new Date().toISOString()
 const app = express();
 app.use(cors());
 app.use(express.json());
+// Basis-Schutz gegen Abuse (Launch-Checkliste): 240 Requests/Minute pro IP
+const allowRequest = createRateLimiter({ limit: 240, windowMs: 60_000 });
+app.use((req, res, next) => {
+  if (!allowRequest(req.ip ?? 'unknown')) {
+    return res.status(429).json({ error: 'Zu viele Anfragen — bitte kurz warten' });
+  }
+  next();
+});
 // Demo-Auth: fester Nutzer via Header (Produktion: Supabase Auth / JWT).
 // Unbekannte Nutzer-IDs → 401 statt späterer 500er in den Routen.
 app.use((req, res, next) => {
@@ -49,7 +58,7 @@ app.get('/api/health', (_req, res) => res.json({ ok: true, name: 'zamma-server' 
 app.use('/api/events', eventsRouter(db, notify));
 app.use('/api/feedback', feedbackRouter(db, notify));
 app.use('/api/chats', chatsRouter(db, notify, broadcast));
-app.use('/api/users', usersRouter(db));
+app.use('/api/users', usersRouter(db, notify));
 app.use('/api/verification', verificationRouter(db));
 app.get('/api/notifications', (req, res) => {
   res.json(db.prepare('SELECT * FROM notifications WHERE userId = ? ORDER BY createdAt DESC LIMIT 50')

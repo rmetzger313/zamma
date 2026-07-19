@@ -12,6 +12,7 @@ import { seed } from '../src/seed.js';
 import { runTick, ensureNextInstance } from '../src/logic/tick.js';
 import { confirmNoShow } from '../src/logic/noshow.js';
 import { matchesUser } from '../src/serialize.js';
+import { createRateLimiter } from '../src/logic/ratelimit.js';
 
 const H = 3600000, D = 24 * H;
 
@@ -158,6 +159,42 @@ test('Recurrence: lokale Uhrzeit bleibt über die Zeitumstellung stabil', () => 
   const next = new Date(nextOccurrence(start.toISOString(), 'weekly'));
   assert.equal(next.getHours(), 9);
   assert.equal(next.getDay(), start.getDay());
+});
+
+// ── Konto-Löschung ───────────────────────────────────────────────────────
+test('Konto-Löschung: anonymisiert, entfernt Inhalte, sagt gehostete Events ab', async () => {
+  const { deleteAccount } = await import('../src/routes/users.js');
+  const db = openDb(':memory:');
+  seed(db);
+  const sent = [];
+  deleteAccount(db, 'u_helga', (_db, userId, type, payload) => sent.push({ userId, type, payload }));
+
+  const helga = db.prepare("SELECT * FROM users WHERE id = 'u_helga'").get();
+  assert.equal(helga.name, 'Gelöschtes Profil');
+  assert.equal(helga.verifiedId, 0);
+  // Zukünftiges gehostetes Event (Brettspielabend) abgesagt, Gruppe benachrichtigt
+  const bsa = db.prepare("SELECT status FROM events WHERE id = 'evt_bsa'").get();
+  assert.equal(bsa.status, 'cancelled');
+  assert.ok(sent.some((s) => s.type === 'cancel' && s.payload.eventId === 'evt_bsa'));
+  // Eigene Inhalte weg
+  assert.equal(db.prepare("SELECT COUNT(*) c FROM chat_messages WHERE userId = 'u_helga'").get().c, 0);
+  assert.equal(db.prepare("SELECT COUNT(*) c FROM feedback WHERE fromUserId = 'u_helga' OR aboutUserId = 'u_helga'").get().c, 0);
+  assert.equal(db.prepare("SELECT COUNT(*) c FROM chat_members WHERE userId = 'u_helga'").get().c, 0);
+  // Historie bleibt referenzintakt (Past-Event existiert weiter)
+  assert.ok(db.prepare("SELECT 1 x FROM events WHERE id = 'evt_bsa_past'").get());
+});
+
+// ── Rate-Limit ───────────────────────────────────────────────────────────
+test('Rate-Limit: blockt ab Limit, Fenster gleitet, Schlüssel getrennt', () => {
+  let t = 0;
+  const allow = createRateLimiter({ limit: 3, windowMs: 1000, now: () => t });
+  assert.equal(allow('a'), true);
+  assert.equal(allow('a'), true);
+  assert.equal(allow('a'), true);
+  assert.equal(allow('a'), false); // Limit erreicht
+  assert.equal(allow('b'), true); // anderer Schlüssel unabhängig
+  t = 1001; // Fenster abgelaufen
+  assert.equal(allow('a'), true);
 });
 
 // ── Tick: Attend-Bonus + nächste Instanz (Integration, In-Memory-DB) ─────
