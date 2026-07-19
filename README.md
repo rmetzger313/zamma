@@ -72,6 +72,11 @@ Tab-Bar auf allen Screens außer Onboarding, Thread, Feedback (laut Handoff).
 - **Waldkraiburg** ist als zweiter gespeicherter Standort modelliert — so sind
   beide Demo-Regionen im 25-km-Feed erklärbar; Distanz-Labels dort zeigen
   Ortsangaben („Zentrum") statt km.
+- **Onboarding-CTA** sagt grammatisch korrekt „(1 Hobby)" — die Prototyp-Logik
+  hätte „(1 Hobbys)" erzeugt.
+- **Zustands-Copy ohne Design-Vorlage** (Fehlermeldungen, „Wird veröffentlicht…",
+  Host-CTA, „Ausgebucht", leerer Feedback-Zustand): nötige Zustände, Texte im
+  Ton des Handoffs ergänzt.
 
 ## Produktions-Migrationspfad
 

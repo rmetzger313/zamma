@@ -1,10 +1,10 @@
 // Chat-Thread: fremde Bubbles weiß mit Absendername + Mini-Avatar, eigene
 // Bubbles Terracotta rechtsbündig. Enter sendet. Ohne Tab-Bar (Root-Stack).
 import React, { useEffect, useRef, useState } from 'react';
-import { View, ScrollView, TextInput, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, ScrollView, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { T, Avatar, BackButton, Row } from '../../src/ui';
+import { T, Avatar, BackButton, Row, Input } from '../../src/ui';
 import { colors, font } from '../../src/theme';
 import { api, useApi } from '../../src/api';
 import { useAppState } from '../../src/state';
@@ -14,19 +14,21 @@ export default function ChatThread() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { wsEvent } = useAppState();
-  const { data: thread, setData } = useApi(() => api.thread(seriesId), [seriesId]);
+  const { data: thread, setData, reload } = useApi(() => api.thread(seriesId), [seriesId]);
   const [draft, setDraft] = useState('');
   const scrollRef = useRef(null);
 
   useEffect(() => { api.markRead(seriesId).catch(() => {}); }, [seriesId]);
 
-  // Live eingehende Nachrichten dieser Gruppe anhängen
+  // Live eingehende Nachrichten dieser Gruppe anhängen; nach einem
+  // WS-Reconnect den Thread nachladen (Downtime-Nachrichten fehlen sonst).
   useEffect(() => {
     if (wsEvent?.type === 'chat:message' && wsEvent.seriesId === seriesId) {
       // Funktionales Update: kein stale-closure-Verlust bei schnellen Folge-Nachrichten
       setData((prev) => (prev ? { ...prev, messages: [...prev.messages, wsEvent.message] } : prev));
       api.markRead(seriesId).catch(() => {});
     }
+    if (wsEvent?.type === 'ws:open') reload();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wsEvent]);
 
@@ -110,13 +112,13 @@ export default function ChatThread() {
         )}
       </ScrollView>
       <Row gap={8} style={{ paddingTop: 10, paddingHorizontal: 16, paddingBottom: Math.max(insets.bottom, 30) }}>
-        <TextInput
+        <Input
           value={draft}
           onChangeText={setDraft}
           onSubmitEditing={send}
           blurOnSubmit={false}
           placeholder="Nachricht…"
-          placeholderTextColor={colors.disabled}
+          accessibilityLabel="Nachricht"
           style={{
             flex: 1, borderWidth: 1.5, borderColor: colors.cardBorder, borderRadius: 999,
             paddingVertical: 12, paddingHorizontal: 16, fontSize: 14.5,

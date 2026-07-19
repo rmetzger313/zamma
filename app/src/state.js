@@ -20,21 +20,30 @@ export function AppStateProvider({ children }) {
     reloadPendingFb();
   }, []);
 
-  // Live-Updates (Chat-Nachrichten, Push-Stub) — Reconnect simpel gehalten
+  // Live-Updates (Chat-Nachrichten, Push-Stub) mit Reconnect.
+  // ws:open signalisiert Konsumenten, nach einer Downtime nachzuladen.
   useEffect(() => {
     let closed = false;
+    let timer = null;
     function connect() {
+      if (closed) return;
       try {
         const ws = new WebSocket(wsUrl());
         wsRef.current = ws;
+        ws.onopen = () => { if (!closed) setWsEvent({ type: 'ws:open', at: Date.now() }); };
         ws.onmessage = (e) => {
+          if (closed) return;
           try { setWsEvent({ ...JSON.parse(e.data), at: Date.now() }); } catch {}
         };
-        ws.onclose = () => { if (!closed) setTimeout(connect, 3000); };
+        ws.onclose = () => { if (!closed) timer = setTimeout(connect, 3000); };
       } catch {}
     }
     connect();
-    return () => { closed = true; wsRef.current?.close(); };
+    return () => {
+      closed = true;
+      if (timer) clearTimeout(timer);
+      wsRef.current?.close();
+    };
   }, []);
 
   const value = useMemo(

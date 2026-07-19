@@ -23,12 +23,12 @@ export default function Entdecken() {
   const { pendingFb, fbThanks, setFbThanks } = useAppState();
   const { data: events, reload } = useApi(() => api.events(filter), [filter]);
 
+  useFocusEffect(useCallback(() => { reload(); }, [reload]));
+  // Erfolgs-Banner verschwindet erst beim echten Verlassen des Feeds (wie im
+  // Prototyp) — separater Effekt mit leeren Deps, damit der Cleanup NICHT bei
+  // jedem Filterwechsel (neue reload-Identität) feuert.
   useFocusEffect(
-    useCallback(() => {
-      reload();
-      // Erfolgs-Banner verschwindet, sobald der Feed verlassen wird (wie im Prototyp)
-      return () => setFbThanks(false);
-    }, [reload, setFbThanks])
+    useCallback(() => () => setFbThanks(false), [])
   );
 
   const openEvent = (e) => router.push(`/(tabs)/entdecken/event/${e.id}`);
@@ -101,7 +101,7 @@ export default function Entdecken() {
             <T s={14} w={800} c={colors.white}>{prompt.promptLabel}</T>
             <T s={12} w={600} c={colors.deco}>Dein Feedback hält die Community verlässlich</T>
           </View>
-          <T s={14} w={800} c={colors.amberBright}>→</T>
+          <T s={16} w={800} c={colors.amberBright}>→</T>
         </Pressable>
       ) : null}
 

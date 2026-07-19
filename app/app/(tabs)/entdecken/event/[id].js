@@ -1,16 +1,14 @@
 // Detail: Info-Card, Beschreibung, Host-Card, Teilnehmer-Pills, Sticky-CTA
 // „Mitmachen" → „✓ Du bist dabei" + Absagen, Absage-Modal mit Score-Vorschau.
 import React, { useCallback, useState } from 'react';
-import { View, ScrollView, Pressable } from 'react-native';
+import { View, ScrollView, Pressable, Modal } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { T, Badge, Card, Avatar, SkillDots, VerifiedBadge, BackButton, PrimaryButton, Row } from '../../../../src/ui';
-import { colors, categories } from '../../../../src/theme';
+import { colors, categories, tabBarHeight } from '../../../../src/theme';
 import { api, useApi } from '../../../../src/api';
 import { useAppState } from '../../../../src/state';
-
-const TAB_BAR_HEIGHT = 82;
 
 function InfoRow({ label, children, last }) {
   return (
@@ -33,22 +31,43 @@ export default function EventDetail() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { reloadMe } = useAppState();
-  const { data: event, reload, setData } = useApi(() => api.event(id), [id]);
+  const { data: event, error, reload, setData } = useApi(() => api.event(id), [id]);
   const [modal, setModal] = useState(false);
   const [preview, setPreview] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [actionError, setActionError] = useState(null);
 
   useFocusEffect(useCallback(() => { reload(); }, [reload]));
 
-  if (!event) return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
+  if (!event) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}>
+        <Row gap={10} style={{ paddingTop: 14, paddingHorizontal: 20, paddingBottom: 8 }}>
+          <BackButton onPress={() => router.back()} />
+          <T s={15} w={800}>Verabredung</T>
+        </Row>
+        {error ? (
+          <View style={{ padding: 20, gap: 12 }}>
+            <T s={14} w={700} c={colors.secondary}>
+              Das Treffen konnte nicht geladen werden{error.message ? ` (${error.message})` : ''}.
+            </T>
+            <PrimaryButton label="Erneut versuchen" onPress={reload} />
+          </View>
+        ) : null}
+      </View>
+    );
+  }
 
   const cat = categories[event.category];
   const joined = event.joined;
+  const full = !joined && !event.isHost &&
+    (event.status === 'full' || event.joinedCount >= event.maxSpots);
 
-  // Beitreten — optimistic: sofort mutieren, bei Fehler zurückrollen
+  // Beitreten — optimistic: sofort mutieren, bei Fehler zurückrollen + Meldung
   const onJoin = async () => {
-    if (busy || joined || event.isHost) return;
+    if (busy || joined || event.isHost || full) return;
     setBusy(true);
+    setActionError(null);
     const prev = event;
     setData({
       ...event,
@@ -60,8 +79,9 @@ export default function EventDetail() {
     try {
       const fresh = await api.join(event.id);
       setData(fresh);
-    } catch {
+    } catch (e) {
       setData(prev);
+      setActionError(e.message || 'Beitreten fehlgeschlagen');
     } finally {
       setBusy(false);
     }
@@ -75,6 +95,7 @@ export default function EventDetail() {
 
   const confirmCancel = async () => {
     setModal(false);
+    setActionError(null);
     const prev = event;
     setData({
       ...event,
@@ -87,13 +108,15 @@ export default function EventDetail() {
       await api.cancel(event.id);
       reloadMe(); // Score kann sich geändert haben
       reload();
-    } catch {
+    } catch (e) {
       setData(prev);
+      setActionError(e.message || 'Absagen fehlgeschlagen');
     }
   };
 
   // „Du" immer vorn
   const participants = [...event.participants].sort((a, b) => (b.isMe ? 1 : 0) - (a.isMe ? 1 : 0));
+  const bottomOffset = tabBarHeight(insets);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}>
@@ -103,7 +126,7 @@ export default function EventDetail() {
       </Row>
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ paddingTop: 8, paddingHorizontal: 20, paddingBottom: 190 }}
+        contentContainerStyle={{ paddingTop: 8, paddingHorizontal: 20, paddingBottom: bottomOffset + 110 }}
       >
         <Row gap={8} style={{ marginBottom: 10 }}>
           <Badge label={cat.label} color={cat.color} bg={cat.bg} size={12} pad={{ paddingVertical: 5, paddingHorizontal: 11 }} />
@@ -114,9 +137,9 @@ export default function EventDetail() {
         <T s={24} w={800} lh={28.8} ls={-0.24} style={{ marginBottom: 14 }}>{event.title}</T>
 
         <Card radiusSize={16} pad={0} style={{ paddingHorizontal: 16, paddingVertical: 4, marginBottom: 14 }}>
-          <InfoRow label="Wann"><T s={14} w={800}>{event.dateLabel} · {event.timeLabel}</T></InfoRow>
+          <InfoRow label="Wann"><T s={14} w={700}>{event.dateLabel} · {event.timeLabel}</T></InfoRow>
           <InfoRow label="Wo">
-            <T s={14} w={800}>{event.city}{event.distLabel ? ` · ${event.distLabel}` : ''}</T>
+            <T s={14} w={700}>{event.city}{event.distLabel ? ` · ${event.distLabel}` : ''}</T>
           </InfoRow>
           <InfoRow label="Level">
             <SkillDots level={event.skillLevel} size={14} />
@@ -125,7 +148,7 @@ export default function EventDetail() {
               <Badge label="✦ Passt zu dir" color={colors.success} bg={colors.successSoft} size={11} pad={{ paddingVertical: 3, paddingHorizontal: 9 }} />
             ) : null}
           </InfoRow>
-          <InfoRow label="Plätze" last><T s={14} w={800} c={colors.success}>{event.spotsLabel}</T></InfoRow>
+          <InfoRow label="Plätze" last><T s={14} w={700} c={colors.success}>{event.spotsLabel}</T></InfoRow>
         </Card>
 
         {event.description ? (
@@ -175,8 +198,11 @@ export default function EventDetail() {
       </ScrollView>
 
       {/* Sticky-CTA über der Tab-Bar */}
-      <View style={{ position: 'absolute', left: 0, right: 0, bottom: TAB_BAR_HEIGHT }}>
+      <View style={{ position: 'absolute', left: 0, right: 0, bottom: bottomOffset }}>
         <LinearGradient colors={['rgba(250,246,240,0)', colors.bg]} locations={[0, 0.4]} style={{ paddingTop: 14, paddingHorizontal: 20, paddingBottom: 14 }}>
+          {actionError ? (
+            <T s={13} w={700} c={colors.primaryDark} center style={{ marginBottom: 8 }}>{actionError}</T>
+          ) : null}
           {event.isHost ? (
             <PrimaryButton label="Du bist Host dieses Treffens" disabled />
           ) : joined ? (
@@ -186,18 +212,20 @@ export default function EventDetail() {
                 <T s={13.5} w={800} c={colors.primaryDark}>Absagen</T>
               </Pressable>
             </>
+          ) : full ? (
+            <PrimaryButton label="Ausgebucht" disabled />
           ) : (
             <PrimaryButton label="Mitmachen" onPress={onJoin} />
           )}
         </LinearGradient>
       </View>
 
-      {/* Absage-Modal */}
-      {modal ? (
+      {/* Absage-Modal — RN-Modal deckt auch die Tab-Bar ab, Android-Back schließt */}
+      <Modal visible={modal} transparent statusBarTranslucent animationType="fade" onRequestClose={() => setModal(false)}>
         <View
           style={{
-            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: colors.overlay,
-            alignItems: 'center', justifyContent: 'center', padding: 24, zIndex: 10,
+            flex: 1, backgroundColor: colors.overlay,
+            alignItems: 'center', justifyContent: 'center', padding: 24,
           }}
         >
           <View style={{ backgroundColor: colors.white, borderRadius: 20, padding: 22, width: '100%', maxWidth: 320 }}>
@@ -244,7 +272,7 @@ export default function EventDetail() {
             </Row>
           </View>
         </View>
-      ) : null}
+      </Modal>
     </View>
   );
 }

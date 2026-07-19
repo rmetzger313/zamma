@@ -1,6 +1,6 @@
 // Basis-Komponenten des Design-Systems — pixelgenau nach Handoff-Tokens.
-import React from 'react';
-import { Text, View, Pressable, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { Text, View, Pressable, TextInput, StyleSheet } from 'react-native';
 import { colors, font, radius } from './theme';
 
 // Text mit Gewicht/Größe/Farbe: <T s={17} w={800}>…</T>
@@ -104,10 +104,25 @@ export function VerifiedBadge({ size = 16 }) {
         backgroundColor: colors.success,
         alignItems: 'center', justifyContent: 'center',
       }}
+      accessible={true}
       accessibilityLabel="Verifiziert"
     >
       <T s={size * 0.62} w={800} c={colors.white}>✓</T>
     </View>
+  );
+}
+
+// Text-Input mit Terracotta-Fokus-Rahmen (Prototyp: input:focus → #e05d38)
+export function Input({ style, onFocus, onBlur, ...rest }) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <TextInput
+      placeholderTextColor={colors.disabled}
+      {...rest}
+      onFocus={(e) => { setFocused(true); onFocus?.(e); }}
+      onBlur={(e) => { setFocused(false); onBlur?.(e); }}
+      style={[style, focused && { borderColor: colors.primary }]}
+    />
   );
 }
 

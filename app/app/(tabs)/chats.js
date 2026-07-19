@@ -16,7 +16,7 @@ export default function Chats() {
 
   useFocusEffect(useCallback(() => { reload(); }, [reload]));
   useEffect(() => {
-    if (wsEvent?.type === 'chat:message') reload();
+    if (wsEvent?.type === 'chat:message' || wsEvent?.type === 'ws:open') reload();
   }, [wsEvent, reload]);
 
   return (

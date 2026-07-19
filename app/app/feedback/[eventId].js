@@ -1,10 +1,10 @@
 // Feedback geben (Kern des Anti-Timewaster-Systems): 5 Sterne, Attribut-Chips,
 // optionaler Kommentar. Senden disabled bis mindestens 1 Stern. Ohne Tab-Bar.
 import React, { useState } from 'react';
-import { View, ScrollView, TextInput, Pressable } from 'react-native';
+import { View, ScrollView, Pressable } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { T, Avatar, BackButton, SectionLabel, PrimaryButton, Row, Card } from '../../src/ui';
+import { T, Avatar, BackButton, SectionLabel, PrimaryButton, Row, Card, Input } from '../../src/ui';
 import { colors, font } from '../../src/theme';
 import { api } from '../../src/api';
 import { useAppState } from '../../src/state';
@@ -61,7 +61,11 @@ export default function FeedbackScreen() {
         <BackButton onPress={() => router.back()} />
         <T s={15} w={800}>Feedback geben</T>
       </Row>
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingTop: 8, paddingHorizontal: 20, paddingBottom: 40 }}>
+      <ScrollView
+        style={{ flex: 1 }}
+        automaticallyAdjustKeyboardInsets
+        contentContainerStyle={{ paddingTop: 8, paddingHorizontal: 20, paddingBottom: 40 }}
+      >
         {item ? (
           <Card radiusSize={16} pad={0} style={{ paddingVertical: 14, paddingHorizontal: 16, marginBottom: 20 }}>
             <Row gap={12}>
@@ -121,12 +125,12 @@ export default function FeedbackScreen() {
         </Row>
 
         <SectionLabel>KOMMENTAR (OPTIONAL)</SectionLabel>
-        <TextInput
+        <Input
           value={note}
           onChangeText={setNote}
           multiline
           placeholder="Kurz & ehrlich — hilft allen weiter"
-          placeholderTextColor={colors.disabled}
+          accessibilityLabel="Kommentar"
           style={{
             width: '100%', minHeight: 80, borderWidth: 1.5, borderColor: colors.cardBorder,
             borderRadius: 14, paddingVertical: 13, paddingHorizontal: 14,

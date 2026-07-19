@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { makeId } from '../db.js';
 import { getUser } from '../repo.js';
-import { whenLabel, slotLabel } from '../format.js';
+import { whenLabel, slotLabel, initials } from '../format.js';
 
 function groupSub(db, seriesId) {
   const { c } = db.prepare('SELECT COUNT(*) AS c FROM chat_members WHERE seriesId = ?').get(seriesId);
@@ -66,7 +66,7 @@ export function chatsRouter(db, notify, broadcast) {
         return {
           id: m.id,
           who: u.name,
-          initials: u.name.slice(0, 2).toUpperCase(),
+          initials: initials(u.name), // Wortinitialen: "Jonas K." → "JK" (wie Prototyp)
           color: u.avatarColor,
           text: m.text,
           mine: m.userId === req.userId,
@@ -99,7 +99,7 @@ export function chatsRouter(db, notify, broadcast) {
     const others = db.prepare('SELECT userId FROM chat_members WHERE seriesId = ? AND userId != ?')
       .all(req.params.seriesId, req.userId);
     for (const o of others) notify(db, o.userId, 'chat', { seriesId: req.params.seriesId, from: me.name, text });
-    const message = { id, who: me.name, initials: me.name.slice(0, 2).toUpperCase(), color: me.avatarColor,
+    const message = { id, who: me.name, initials: initials(me.name), color: me.avatarColor,
       text, mine: false, createdAt: now };
     broadcast(others.map((o) => o.userId), { type: 'chat:message', seriesId: req.params.seriesId, message });
     res.status(201).json({ ...message, mine: true });

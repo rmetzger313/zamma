@@ -1,15 +1,13 @@
 // Erstellen: Titel, Kategorie-Chips, Level-Segmente, Datum/Uhrzeit, Treffpunkt,
 // Wiederkehrend-Toggle. „Veröffentlichen" legt das Event an und springt in den Feed.
 import React, { useRef, useState } from 'react';
-import { View, ScrollView, TextInput, Pressable, Animated } from 'react-native';
+import { View, ScrollView, Pressable, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { T, Chip, SectionLabel, PrimaryButton, Row } from '../../src/ui';
-import { colors, categories, font, radius } from '../../src/theme';
+import { T, Chip, SectionLabel, PrimaryButton, Row, Input } from '../../src/ui';
+import { colors, categories, font, radius, tabBarHeight } from '../../src/theme';
 import { api } from '../../src/api';
-
-const TAB_BAR_HEIGHT = 82;
 
 const inputStyle = {
   width: '100%',
@@ -38,6 +36,7 @@ export default function Erstellen() {
   const [rec, setRec] = useState(false);
   const [titleError, setTitleError] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
   const knob = useRef(new Animated.Value(0)).current;
 
   const toggleRec = () => {
@@ -49,6 +48,7 @@ export default function Erstellen() {
     if (!title.trim()) { setTitleError(true); return; }
     if (busy) return;
     setBusy(true);
+    setError(null);
     try {
       await api.createEvent({
         title: title.trim(),
@@ -60,7 +60,9 @@ export default function Erstellen() {
       });
       setTitle(''); setOrt(''); setRec(false); knob.setValue(0); setTitleError(false);
       router.push('/(tabs)/entdecken'); // neue Card erscheint oben im Feed
-    } catch {} finally {
+    } catch (e) {
+      setError(e.message || 'Veröffentlichen fehlgeschlagen — bitte erneut versuchen.');
+    } finally {
       setBusy(false);
     }
   };
@@ -72,15 +74,16 @@ export default function Erstellen() {
       </View>
       <ScrollView
         style={{ flex: 1 }}
+        automaticallyAdjustKeyboardInsets
         contentContainerStyle={{ paddingTop: 4, paddingHorizontal: 20, paddingBottom: 200, gap: 16 }}
       >
         <View>
           <SectionLabel style={{ marginBottom: 7 }}>TITEL</SectionLabel>
-          <TextInput
+          <Input
             value={title}
             onChangeText={(t) => { setTitle(t); if (t.trim()) setTitleError(false); }}
             placeholder="z. B. Feierabend-Radrunde"
-            placeholderTextColor={colors.disabled}
+            accessibilityLabel="Titel"
             style={[inputStyle, titleError && { borderColor: colors.primaryDark }]}
           />
           {titleError ? (
@@ -130,19 +133,19 @@ export default function Erstellen() {
         <Row gap={10} center={false}>
           <View style={{ flex: 1 }}>
             <SectionLabel style={{ marginBottom: 7 }}>DATUM</SectionLabel>
-            <TextInput value={date} onChangeText={setDate} style={inputStyle} />
+            <Input value={date} onChangeText={setDate} accessibilityLabel="Datum" style={inputStyle} />
           </View>
           <View style={{ flex: 1 }}>
             <SectionLabel style={{ marginBottom: 7 }}>UHRZEIT</SectionLabel>
-            <TextInput value={time} onChangeText={setTime} style={inputStyle} />
+            <Input value={time} onChangeText={setTime} accessibilityLabel="Uhrzeit" style={inputStyle} />
           </View>
         </Row>
         <View>
           <SectionLabel style={{ marginBottom: 7 }}>TREFFPUNKT</SectionLabel>
-          <TextInput
+          <Input
             value={ort} onChangeText={setOrt}
             placeholder="z. B. Marienplatz, München"
-            placeholderTextColor={colors.disabled}
+            accessibilityLabel="Treffpunkt"
             style={inputStyle}
           />
         </View>
@@ -177,8 +180,11 @@ export default function Erstellen() {
           </View>
         </Pressable>
       </ScrollView>
-      <View style={{ position: 'absolute', left: 0, right: 0, bottom: TAB_BAR_HEIGHT }}>
+      <View style={{ position: 'absolute', left: 0, right: 0, bottom: tabBarHeight(insets) }}>
         <LinearGradient colors={['rgba(250,246,240,0)', colors.bg]} locations={[0, 0.4]} style={{ paddingTop: 10, paddingHorizontal: 20, paddingBottom: 10 }}>
+          {error ? (
+            <T s={13} w={700} c={colors.primaryDark} center style={{ marginBottom: 8 }}>{error}</T>
+          ) : null}
           <PrimaryButton label={busy ? 'Wird veröffentlicht…' : 'Veröffentlichen'} onPress={publish} />
         </LinearGradient>
       </View>

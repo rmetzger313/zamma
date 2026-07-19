@@ -48,3 +48,8 @@ export const spacing = { page: 20, cardPad: 16, cardPadSm: 14, listGap: 12 };
 
 export const HOBBIES = ['Laufen', 'Fußball', 'Bouldern', 'Radfahren', 'Wandern', 'Brettspiele',
   'Schafkopf', 'Fotografie', 'Malen', 'Musik', 'Kochen', 'Bücher'];
+
+// Custom-Tab-Bar: Inhalt (Icon+Label+Paddings) ≈ 56, Bottom-Pad Safe-Area-abhängig
+// (Design-Basis 26; auf Geräten mit größerem Inset wächst es mit).
+export const tabBarBottomPad = (insets) => Math.max((insets?.bottom ?? 0) + 8, 26);
+export const tabBarHeight = (insets) => 56 + tabBarBottomPad(insets);

@@ -3,8 +3,9 @@
 import React from 'react';
 import { View, Pressable } from 'react-native';
 import { Tabs } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { T } from '../../src/ui';
-import { colors } from '../../src/theme';
+import { colors, tabBarBottomPad } from '../../src/theme';
 
 const TAB_META = {
   entdecken: { label: 'Entdecken', glyph: '', shape: 'circle' },
@@ -41,13 +42,15 @@ function TabIcon({ name, active }) {
 }
 
 function ZammaTabBar({ state, navigation }) {
+  const insets = useSafeAreaInsets();
   return (
     <View
       style={{
         position: 'absolute', left: 0, right: 0, bottom: 0,
         backgroundColor: colors.tabBarBg,
         borderTopWidth: 1, borderTopColor: colors.cardBorder,
-        flexDirection: 'row', paddingTop: 8, paddingHorizontal: 8, paddingBottom: 26,
+        flexDirection: 'row', paddingTop: 8, paddingHorizontal: 8,
+        paddingBottom: tabBarBottomPad(insets),
       }}
     >
       {state.routes.map((route, i) => {
@@ -71,8 +74,6 @@ function ZammaTabBar({ state, navigation }) {
     </View>
   );
 }
-
-export const TAB_BAR_HEIGHT = 82;
 
 export default function TabsLayout() {
   return (

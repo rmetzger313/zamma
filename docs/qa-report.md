@@ -71,6 +71,31 @@ Testsuite nach Runde 3: **26/26 grün**; Routen-Fixes zusätzlich per Live-API
 verifiziert (Host-Late-Cancel 96→93, Austritt aus abgesagtem Event delta 0,
 Feedback auf abgesagtes Event 409).
 
+## Runde 4 (maschinelle UX- und Frontend-Reviewer)
+
+| # | Befund | Status |
+|---|---|---|
+| 24 | Chat-Thread-Initialen „JO"/„HE" statt Wortinitialen „JK"/„HB" | ✅ Fix in `chats.js` |
+| 25/26 | Absage-Modal deckte Tab-Bar nicht ab; Tab-Wechsel bei offenem Modal; Android-Back schloss Screen statt Modal | ✅ RN-`<Modal transparent>` mit `onRequestClose` |
+| 27 | Join/Cancel-Fehler stumm; volle Events zeigten „Mitmachen" | ✅ Fehleranzeige + „Ausgebucht"-Zustand |
+| 28 | Veröffentlichen-Fehler stumm (leerer catch) | ✅ Fehleranzeige |
+| 29 | useApi-Race: alte Antwort konnte neuere überschreiben (Filterwechsel) | ✅ Sequenz-Token |
+| 30 | iOS-Tastatur verdeckte Eingaben (Erstellen/Feedback) | ✅ `automaticallyAdjustKeyboardInsets` |
+| 31 | Tab-Bar festes `paddingBottom: 26` statt Safe-Area; `TAB_BAR_HEIGHT` hart kopiert | ✅ `tabBarHeight(insets)`-Helper überall |
+| 32 | Detail-Screen bei Ladefehler dauerhaft leer ohne Back/Retry | ✅ Fehler-Fallback mit Retry |
+| 33 | Info-Card-Werte 800 statt 700 (`<b>` im Prototyp) | ✅ |
+| 34 | Banner-Pfeile 14 px statt 16 px | ✅ |
+| 35 | Kein Terracotta-Fokus-Rahmen auf Inputs (Prototyp `input:focus`) | ✅ `Input`-Komponente |
+| 36 | „(1 Hobby)" statt Prototyp-„(N Hobbys)" | ⚪ Bewusst: grammatisch korrekt (README) |
+| 37 | Zusätzliche Zustands-Copy ohne Design-Abnahme | ⚪ Bewusst dokumentiert (README) |
+| 38 | WS-Reconnect: Timer-Leak + kein Nachladen nach Downtime | ✅ Cleanup + `ws:open`-Reload |
+| 39 | Danke-Banner verschwand schon bei Filterwechsel (Effekt-Deps) | ✅ separater Effekt mit leeren Deps |
+| 40 | a11y: Datum/Uhrzeit ohne Label; VerifiedBadge ohne `accessible` | ✅ |
+
+Hinweis: Die Verify-Agenten dieser Runde scheiterten am Subagenten-Limit —
+alle 17 Befunde wurden stattdessen manuell am Code verifiziert (15 bestätigt
+und gefixt, 2 als bewusste Entscheidungen eingestuft).
+
 ## Offen / außerhalb der Demo-Reife
 
 Siehe `docs/launch-checklist.md` — echte Auth, PostGIS/Supabase, FCM/APNs,

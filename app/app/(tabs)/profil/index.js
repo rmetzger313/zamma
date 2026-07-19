@@ -78,7 +78,7 @@ export default function Profil() {
           </T>
           Pünktlichkeit &amp; Feedback halten die Community verlässlich — wer oft absagt, wird früh erkennbar.
         </T>
-        <T s={14} w={800} c={colors.success}>›</T>
+        <T s={16} w={800} c={colors.success}>›</T>
       </Pressable>
 
       <SectionLabel>MEINE HOBBYS</SectionLabel>

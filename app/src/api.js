@@ -47,18 +47,23 @@ export const api = {
 };
 
 // Mini-Datenhook: lädt beim Mount und bei deps-Wechsel, mit reload().
+// Sequenz-Token entwertet überholte Antworten (z. B. schneller Filterwechsel),
+// damit eine langsame alte Antwort nie eine neuere überschreibt.
 export function useApi(fn, deps = []) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const alive = useRef(true);
+  const seq = useRef(0);
   useEffect(() => () => { alive.current = false; }, []);
   const load = useCallback(() => {
+    const token = ++seq.current;
+    const fresh = () => alive.current && seq.current === token;
     setLoading(true);
     fn()
-      .then((d) => alive.current && (setData(d), setError(null)))
-      .catch((e) => alive.current && setError(e))
-      .finally(() => alive.current && setLoading(false));
+      .then((d) => fresh() && (setData(d), setError(null)))
+      .catch((e) => fresh() && setError(e))
+      .finally(() => fresh() && setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
   useEffect(() => { load(); }, [load]);
