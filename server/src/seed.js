@@ -76,6 +76,23 @@ export function seed(db, now = Date.now()) {
 
   const insHobby = db.prepare('INSERT INTO user_hobbies (userId, hobby, skillLevel) VALUES (?, ?, ?)');
   for (const [hobby, lvl] of [['Laufen', 1], ['Brettspiele', 1], ['Fotografie', 1]]) insHobby.run('u_anna', hobby, lvl);
+  // Hobbys der übrigen Demo-Nutzer (Basis fürs Leute-Matching)
+  const HOBBY_SEED = {
+    u_jonas: [['Laufen', 2], ['Radfahren', 1]],
+    u_helga: [['Brettspiele', 3], ['Schafkopf', 2]],
+    u_miriam: [['Bouldern', 2], ['Laufen', 1]],
+    u_david: [['Fotografie', 2], ['Wandern', 1]],
+    u_sepp: [['Schafkopf', 3]],
+    u_luca: [['Kochen', 2]],
+    u_lea: [['Laufen', 1], ['Fotografie', 1]],
+    u_tom: [['Laufen', 1], ['Brettspiele', 1]],
+    u_kurt: [['Brettspiele', 1]],
+    u_ines: [['Brettspiele', 2], ['Kochen', 1]],
+    u_emma: [['Kochen', 1], ['Malen', 1]],
+  };
+  for (const [uid, hs] of Object.entries(HOBBY_SEED)) {
+    for (const [hobby, lvl] of hs) insHobby.run(uid, hobby, lvl);
+  }
 
   const insLoc = db.prepare('INSERT INTO user_locations (userId, name, lat, lng, radiusKm, isPrimary) VALUES (?, ?, ?, ?, ?, ?)');
   insLoc.run('u_anna', 'München & Umgebung', 48.1374, 11.5755, 25, 1);

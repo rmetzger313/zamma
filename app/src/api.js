@@ -44,6 +44,11 @@ export const api = {
     request(`/chats/${seriesId}/messages`, { method: 'POST', body: { text } }),
   markRead: (seriesId) => request(`/chats/${seriesId}/read`, { method: 'POST' }),
   verification: () => request('/verification'),
+  matches: () => request('/matches'),
+  suggestions: () => request('/users/me/suggestions'),
+  badges: () => request('/users/me/badges'),
+  block: (userId) => request('/blocks', { method: 'POST', body: { userId } }),
+  report: (payload) => request('/reports', { method: 'POST', body: payload }),
 };
 
 // Mini-Datenhook: lädt beim Mount und bei deps-Wechsel, mit reload().

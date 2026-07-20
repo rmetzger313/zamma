@@ -4,7 +4,7 @@ import React, { useCallback, useState } from 'react';
 import { View, ScrollView, Pressable } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { T, Chip, Row, Avatar } from '../../../src/ui';
+import { T, Chip, Row, Avatar, Card, SectionLabel, VerifiedBadge } from '../../../src/ui';
 import { colors, categories } from '../../../src/theme';
 import { api, useApi } from '../../../src/api';
 import { useAppState } from '../../../src/state';
@@ -22,8 +22,9 @@ export default function Entdecken() {
   const [view, setView] = useState('list');
   const { pendingFb, fbThanks, setFbThanks } = useAppState();
   const { data: events, reload } = useApi(() => api.events(filter), [filter]);
+  const { data: people, reload: reloadPeople } = useApi(api.matches, []);
 
-  useFocusEffect(useCallback(() => { reload(); }, [reload]));
+  useFocusEffect(useCallback(() => { reload(); reloadPeople(); }, [reload, reloadPeople]));
   // Erfolgs-Banner verschwindet erst beim echten Verlassen des Feeds (wie im
   // Prototyp) — separater Effekt mit leeren Deps, damit der Cleanup NICHT bei
   // jedem Filterwechsel (neue reload-Identität) feuert.
@@ -131,6 +132,33 @@ export default function Entdecken() {
           style={{ flex: 1 }}
           contentContainerStyle={{ paddingTop: 2, paddingHorizontal: 20, paddingBottom: 96, gap: 12 }}
         >
+          {/* Leute-Matching: Kompatibilität über gemeinsame Hobbys */}
+          {filter === 'alle' && people?.length ? (
+            <View>
+              <SectionLabel>LEUTE IN DEINER NÄHE</SectionLabel>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ gap: 10 }}
+              >
+                {people.map((p) => (
+                  <Card key={p.id} radiusSize={16} pad={12} style={{ width: 150 }}>
+                    <View style={{ alignItems: 'center', gap: 6 }}>
+                      <Avatar initials={p.initials} color={p.avatarColor} size={40} textSize={14} />
+                      <Row gap={5}>
+                        <T s={13.5} w={800} numberOfLines={1}>{p.name}</T>
+                        {p.verified ? <VerifiedBadge size={14} /> : null}
+                      </Row>
+                      <T s={11.5} w={700} c={colors.success} center numberOfLines={1}>
+                        {p.sharedHobbies.slice(0, 2).join(' · ') || 'Ähnliche Hobbys'}
+                      </T>
+                      <T s={11} w={600} c={colors.muted} center numberOfLines={1}>{p.repLabel}</T>
+                    </View>
+                  </Card>
+                ))}
+              </ScrollView>
+            </View>
+          ) : null}
           {(events ?? []).map((e) => (
             <EventCard key={e.id} event={e} onPress={() => openEvent(e)} />
           ))}
