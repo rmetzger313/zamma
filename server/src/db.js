@@ -98,6 +98,20 @@ export function openDb(file = join(DATA_DIR, 'zamma.db')) {
       text TEXT NOT NULL,
       createdAt TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS blocks (
+      userId TEXT NOT NULL REFERENCES users(id),
+      blockedId TEXT NOT NULL REFERENCES users(id),
+      createdAt TEXT NOT NULL,
+      PRIMARY KEY (userId, blockedId)
+    );
+    CREATE TABLE IF NOT EXISTS reports (
+      id TEXT PRIMARY KEY,
+      fromUserId TEXT NOT NULL REFERENCES users(id),
+      targetType TEXT NOT NULL CHECK (targetType IN ('user','event','message')),
+      targetId TEXT NOT NULL,
+      reason TEXT NOT NULL,
+      createdAt TEXT NOT NULL
+    );
     CREATE TABLE IF NOT EXISTS notifications (
       id TEXT PRIMARY KEY,
       userId TEXT NOT NULL REFERENCES users(id),

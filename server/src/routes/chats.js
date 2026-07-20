@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { makeId } from '../db.js';
 import { getUser } from '../repo.js';
 import { whenLabel, slotLabel, initials } from '../format.js';
+import { getBlockedIds } from '../logic/moderation.js';
 
 function groupSub(db, seriesId) {
   const { c } = db.prepare('SELECT COUNT(*) AS c FROM chat_members WHERE seriesId = ?').get(seriesId);
@@ -58,9 +59,11 @@ export function chatsRouter(db, notify, broadcast) {
     const member = db.prepare('SELECT * FROM chat_members WHERE seriesId = ? AND userId = ?')
       .get(req.params.seriesId, req.userId);
     if (!member) return res.status(403).json({ error: 'Kein Mitglied dieser Gruppe' });
+    const blocked = getBlockedIds(db, req.userId);
     const messages = db
       .prepare('SELECT * FROM chat_messages WHERE seriesId = ? ORDER BY createdAt ASC')
       .all(req.params.seriesId)
+      .filter((m) => !blocked.has(m.userId))
       .map((m) => {
         const u = getUser(db, m.userId);
         return {

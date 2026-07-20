@@ -5,6 +5,7 @@ import { getUser, getEvent, getLocations, eventCtx, getMyParticipation, joinedCo
 import { matchLocations, DEFAULT_RADIUS_KM } from '../logic/geo.js';
 import { eventEndMs } from '../logic/feedback.js';
 import { isDemoted } from '../logic/verification.js';
+import { getBlockedIds } from '../logic/moderation.js';
 import { cancelPreview, isLateCancel, applyLateCancel } from '../logic/score.js';
 import { initials } from '../format.js';
 
@@ -33,9 +34,11 @@ export function eventsRouter(db, notify) {
     if (locations.length === 0 && me.lat != null) {
       locations = [{ name: me.city, lat: me.lat, lng: me.lng, radiusKm: DEFAULT_RADIUS_KM }];
     }
+    const blocked = getBlockedIds(db, req.userId);
     let events = db
       .prepare("SELECT * FROM events WHERE status IN ('open','full')")
       .all()
+      .filter((e) => !blocked.has(e.hostId))
       .filter((e) => eventEndMs(e) > nowMs)
       .filter((e) => matchLocations(locations, e.lat, e.lng));
     if (req.query.category && req.query.category !== 'alle') {

@@ -36,6 +36,7 @@ export default function EventDetail() {
   const [preview, setPreview] = useState(null);
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState(null);
+  const [hostMenu, setHostMenu] = useState(null); // null | 'menu' | 'report' | 'reported'
 
   useFocusEffect(useCallback(() => { reload(); }, [reload]));
 
@@ -176,6 +177,16 @@ export default function EventDetail() {
             >
               <T s={12.5} w={800}>Profil</T>
             </Pressable>
+            {!event.isHost ? (
+              <Pressable
+                onPress={() => setHostMenu('menu')}
+                style={{ minWidth: 36, minHeight: 36, alignItems: 'center', justifyContent: 'center' }}
+                accessibilityRole="button"
+                accessibilityLabel="Mehr Optionen"
+              >
+                <T s={18} w={800} c={colors.muted}>⋯</T>
+              </Pressable>
+            ) : null}
           </Row>
         </Card>
 
@@ -219,6 +230,62 @@ export default function EventDetail() {
           )}
         </LinearGradient>
       </View>
+
+      {/* Host-Menü: Melden & Blockieren (Trust & Safety) */}
+      <Modal visible={!!hostMenu} transparent statusBarTranslucent animationType="fade" onRequestClose={() => setHostMenu(null)}>
+        <Pressable style={{ flex: 1, backgroundColor: colors.overlay, justifyContent: 'flex-end' }} onPress={() => setHostMenu(null)}>
+          <Pressable onPress={() => {}} style={{ backgroundColor: colors.white, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 22, paddingBottom: 34 }}>
+            {hostMenu === 'menu' ? (
+              <>
+                <T s={15} w={800} style={{ marginBottom: 14 }}>{event.host.name}</T>
+                <Pressable onPress={() => setHostMenu('report')} style={{ paddingVertical: 12, minHeight: 44 }} accessibilityRole="button">
+                  <T s={14.5} w={700}>Nutzer melden</T>
+                </Pressable>
+                <Pressable
+                  onPress={async () => {
+                    try {
+                      await api.block(event.host.id);
+                      setHostMenu(null);
+                      router.back(); // Events des Geblockten verschwinden aus dem Feed
+                    } catch (e) { setActionError(e.message); setHostMenu(null); }
+                  }}
+                  style={{ paddingVertical: 12, minHeight: 44 }}
+                  accessibilityRole="button"
+                >
+                  <T s={14.5} w={700} c={colors.primaryDark}>Blockieren</T>
+                </Pressable>
+              </>
+            ) : hostMenu === 'report' ? (
+              <>
+                <T s={15} w={800} style={{ marginBottom: 4 }}>Was ist das Problem?</T>
+                <T s={12.5} w={600} c={colors.muted} style={{ marginBottom: 14 }}>Deine Meldung geht anonym an die Moderation.</T>
+                {[['Spam', 'spam'], ['Belästigung', 'harassment'], ['Fake-Profil', 'fake']].map(([label, reason]) => (
+                  <Pressable
+                    key={reason}
+                    onPress={async () => {
+                      try {
+                        await api.report({ targetType: 'user', targetId: event.host.id, reason });
+                        setHostMenu('reported');
+                      } catch (e) { setActionError(e.message); setHostMenu(null); }
+                    }}
+                    style={{ paddingVertical: 12, minHeight: 44 }}
+                    accessibilityRole="button"
+                  >
+                    <T s={14.5} w={700}>{label}</T>
+                  </Pressable>
+                ))}
+              </>
+            ) : (
+              <Row gap={10}>
+                <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: colors.success, alignItems: 'center', justifyContent: 'center' }}>
+                  <T s={12} w={800} c={colors.white}>✓</T>
+                </View>
+                <T s={14} w={700} c={colors.successDark}>Danke — die Moderation schaut sich das an.</T>
+              </Row>
+            )}
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {/* Absage-Modal — RN-Modal deckt auch die Tab-Bar ab, Android-Back schließt */}
       <Modal visible={modal} transparent statusBarTranslucent animationType="fade" onRequestClose={() => setModal(false)}>
