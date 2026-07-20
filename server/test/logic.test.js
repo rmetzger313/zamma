@@ -13,6 +13,10 @@ import { runTick, ensureNextInstance } from '../src/logic/tick.js';
 import { confirmNoShow } from '../src/logic/noshow.js';
 import { matchesUser } from '../src/serialize.js';
 import { createRateLimiter } from '../src/logic/ratelimit.js';
+import { compatibility } from '../src/logic/match.js';
+import { suggestions } from '../src/logic/suggest.js';
+import { computeBadges } from '../src/logic/badges.js';
+import { blockUser, getBlockedIds } from '../src/logic/moderation.js';
 
 const H = 3600000, D = 24 * H;
 
@@ -182,6 +186,53 @@ test('Konto-Löschung: anonymisiert, entfernt Inhalte, sagt gehostete Events ab'
   assert.equal(db.prepare("SELECT COUNT(*) c FROM chat_members WHERE userId = 'u_helga'").get().c, 0);
   // Historie bleibt referenzintakt (Past-Event existiert weiter)
   assert.ok(db.prepare("SELECT 1 x FROM events WHERE id = 'evt_bsa_past'").get());
+});
+
+// ── Leute-Matching ───────────────────────────────────────────────────────
+test('Kompatibilität: gleiches Hobby + Level-Nähe, Kategorie-Punkt, sonst 0', () => {
+  const me = [{ hobby: 'Laufen', skillLevel: 2 }, { hobby: 'Brettspiele', skillLevel: 1 }];
+  assert.deepEqual(compatibility(me, [{ hobby: 'Laufen', skillLevel: 2 }]),
+    { score: 5, shared: ['Laufen'] }); // 3 + 2 (gleiches Level)
+  assert.equal(compatibility(me, [{ hobby: 'Laufen', skillLevel: 3 }]).score, 4); // 3 + 1 (±1)
+  assert.equal(compatibility(me, [{ hobby: 'Radfahren', skillLevel: 1 }]).score, 1); // Kategorie Sport
+  assert.equal(compatibility(me, [{ hobby: 'Kochen', skillLevel: 1 }]).score, 0);
+  assert.deepEqual(compatibility([], [{ hobby: 'Laufen', skillLevel: 1 }]), { score: 0, shared: [] });
+});
+
+// ── Smart Suggestions ────────────────────────────────────────────────────
+test('Suggestions: ähnliche Hobbys ohne Duplikate zu eigenen', () => {
+  const s = suggestions([{ hobby: 'Laufen', skillLevel: 1 }, { hobby: 'Radfahren', skillLevel: 2 }]);
+  const names = s.map((x) => x.hobby);
+  assert.ok(names.includes('Wandern'));
+  assert.ok(!names.includes('Laufen') && !names.includes('Radfahren')); // nichts Eigenes
+  assert.equal(new Set(names).size, names.length); // keine Duplikate
+  assert.deepEqual(suggestions([]), []);
+});
+
+// ── Badges ───────────────────────────────────────────────────────────────
+test('Badges: abgeleitet aus Treffen, Serie, Score und 5-Sterne-Feedback', () => {
+  const db = openDb(':memory:');
+  seed(db);
+  const badges = Object.fromEntries(computeBadges(db, 'u_anna').map((b) => [b.key, b.earned]));
+  assert.equal(badges.first_meeting, true); // 14 Treffen
+  assert.equal(badges.ten_meetings, true);
+  assert.equal(badges.rock_solid, true); // 96 % bei 14 Treffen
+  assert.equal(badges.five_star, true); // 5★ von Jonas/Helga
+  assert.equal(badges.series_regular, false); // nur je 1 attended pro Serie im Seed
+  const fresh = Object.fromEntries(computeBadges(db, 'u_lea').map((b) => [b.key, b.earned]));
+  assert.equal(fresh.ten_meetings, false); // Lea: 8 Treffen
+});
+
+// ── Moderation: Block wirkt auf Feed-Daten ───────────────────────────────
+test('Block: Selbst-Block abgelehnt, Blockliste gefüllt, idempotent', () => {
+  const db = openDb(':memory:');
+  seed(db);
+  assert.throws(() => blockUser(db, 'u_anna', 'u_anna'), /nicht selbst/);
+  assert.throws(() => blockUser(db, 'u_anna', 'u_gibtsnicht'), /nicht gefunden/);
+  blockUser(db, 'u_anna', 'u_jonas');
+  blockUser(db, 'u_anna', 'u_jonas'); // idempotent
+  const blocked = getBlockedIds(db, 'u_anna');
+  assert.deepEqual([...blocked], ['u_jonas']);
 });
 
 // ── Rate-Limit ───────────────────────────────────────────────────────────

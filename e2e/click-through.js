@@ -37,6 +37,8 @@ const BASE = process.env.E2E_BASE || 'http://localhost:8081';
   // Level-Matching: Brettspiele L2 muss das Level-2-Spiele-Event (Schafkopf) matchen
   const matchBadges = await page.getByText('✦ Passt zu dir').count();
   if (matchBadges < 5) throw new Error(`Level-Matching: erwartet >=5 Badges, war ${matchBadges}`);
+  // Leute-Matching: Sektion mit kompatiblen Nutzern
+  await page.getByText('LEUTE IN DEINER NÄHE').waitFor();
   await shot('02-entdecken-feed');
 
   await tapText('⊞ Karte');
@@ -78,7 +80,9 @@ const BASE = process.env.E2E_BASE || 'http://localhost:8081';
   await tapText('←');
 
   await tapTab('Profil');
-  await page.getByText('ZUVERLÄSSIG').waitFor();
+  await page.getByText('ZUVERLÄSSIG', { exact: true }).waitFor();
+  await page.getByText('KÖNNTE DIR GEFALLEN').waitFor(); // Smart Suggestions
+  await page.getByText('ABZEICHEN').waitFor(); // Badges
   await shot('10-profil');
   await tapText('›');
   await page.getByText('Du bist voll verifiziert').waitFor();

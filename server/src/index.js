@@ -11,6 +11,8 @@ import { feedbackRouter } from './routes/feedback.js';
 import { chatsRouter } from './routes/chats.js';
 import { usersRouter } from './routes/users.js';
 import { verificationRouter } from './routes/verification.js';
+import { matchesRouter } from './routes/matches.js';
+import { moderationRouter } from './routes/moderation.js';
 
 const PORT = process.env.PORT || 4000;
 const db = openDb(process.env.DB_FILE);
@@ -60,6 +62,8 @@ app.use('/api/feedback', feedbackRouter(db, notify));
 app.use('/api/chats', chatsRouter(db, notify, broadcast));
 app.use('/api/users', usersRouter(db, notify));
 app.use('/api/verification', verificationRouter(db));
+app.use('/api/matches', matchesRouter(db));
+app.use('/api', moderationRouter(db));
 app.get('/api/notifications', (req, res) => {
   res.json(db.prepare('SELECT * FROM notifications WHERE userId = ? ORDER BY createdAt DESC LIMIT 50')
     .all(req.userId).map((n) => ({ ...n, payload: JSON.parse(n.payload) })));
