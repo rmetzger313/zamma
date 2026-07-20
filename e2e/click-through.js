@@ -27,11 +27,16 @@ const BASE = process.env.E2E_BASE || 'http://localhost:8081';
 
   await page.goto(BASE);
   await page.getByText('Gemeinsam statt allein.').waitFor({ timeout: 180000 });
+  // Skill-Level-Zyklus: Brettspiele von Level 1 auf 2 (Test der Matching-Kette)
+  await tapText('Brettspiele');
   await shot('01-onboarding');
 
   await page.getByText(/^Los geht's/).click();
   await page.getByText('DEIN UMKREIS').waitFor();
   await page.getByText('Lauftreff Englischer Garten').first().waitFor();
+  // Level-Matching: Brettspiele L2 muss das Level-2-Spiele-Event (Schafkopf) matchen
+  const matchBadges = await page.getByText('✦ Passt zu dir').count();
+  if (matchBadges < 5) throw new Error(`Level-Matching: erwartet >=5 Badges, war ${matchBadges}`);
   await shot('02-entdecken-feed');
 
   await tapText('⊞ Karte');

@@ -3,7 +3,7 @@ import React, { useCallback } from 'react';
 import { View, ScrollView, Pressable } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { T, Avatar, VerifiedBadge, Card, SectionLabel, Row } from '../../../src/ui';
+import { T, Avatar, VerifiedBadge, Card, SectionLabel, Row, SkillDots } from '../../../src/ui';
 import { colors } from '../../../src/theme';
 import { useAppState } from '../../../src/state';
 
@@ -84,12 +84,14 @@ export default function Profil() {
       <SectionLabel>MEINE HOBBYS</SectionLabel>
       <Row gap={8} style={{ flexWrap: 'wrap', marginBottom: 18 }}>
         {me.hobbies.map((h) => (
-          <View
+          <Row
             key={h.name}
+            gap={6}
             style={{ backgroundColor: colors.primarySoft, borderRadius: 999, paddingVertical: 7, paddingHorizontal: 13 }}
           >
             <T s={13} w={700} c={colors.primaryDark}>{h.name}</T>
-          </View>
+            <SkillDots level={h.skillLevel} size={9} />
+          </Row>
         ))}
       </Row>
 

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { View, ScrollView, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { T, Chip, PrimaryButton, Row } from '../src/ui';
+import { T, PrimaryButton, Row, SkillDots } from '../src/ui';
 import { colors, HOBBIES } from '../src/theme';
 import { api } from '../src/api';
 import { useAppState } from '../src/state';
@@ -12,14 +12,21 @@ export default function Onboarding() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { setOnboarded, reloadMe } = useAppState();
-  const [selected, setSelected] = useState({ Laufen: true, Brettspiele: true, Fotografie: true });
-  const count = Object.keys(selected).filter((k) => selected[k]).length;
+  // Wert = Skill-Level (1–3); Tippen zykelt: aus → 1 → 2 → 3 → aus
+  const [selected, setSelected] = useState({ Laufen: 1, Brettspiele: 1, Fotografie: 1 });
+  const count = Object.keys(selected).length;
 
-  const toggle = (name) =>
-    setSelected((s) => ({ ...s, [name]: !s[name] }));
+  const cycle = (name) =>
+    setSelected((s) => {
+      const next = ((s[name] ?? 0) + 1) % 4;
+      const copy = { ...s };
+      if (next === 0) delete copy[name];
+      else copy[name] = next;
+      return copy;
+    });
 
   const finish = async () => {
-    const hobbies = Object.keys(selected).filter((k) => selected[k]);
+    const hobbies = Object.entries(selected).map(([name, skillLevel]) => ({ name, skillLevel }));
     if (hobbies.length) {
       try { await api.saveHobbies(hobbies); reloadMe(); } catch {}
     }
@@ -50,10 +57,33 @@ export default function Onboarding() {
           Finde Leute in deiner Nähe, die dein Hobby teilen. Was machst du gern?
         </T>
         <Row gap={8} style={{ flexWrap: 'wrap' }}>
-          {HOBBIES.map((name) => (
-            <Chip key={name} label={name} active={!!selected[name]} onPress={() => toggle(name)} />
-          ))}
+          {HOBBIES.map((name) => {
+            const lvl = selected[name] ?? 0;
+            const active = lvl > 0;
+            return (
+              <Pressable
+                key={name}
+                onPress={() => cycle(name)}
+                style={{
+                  flexDirection: 'row', alignItems: 'center', gap: 6,
+                  borderWidth: 1.5, borderRadius: 999,
+                  paddingVertical: 9, paddingHorizontal: 15, minHeight: 36,
+                  borderColor: active ? colors.primaryDark : colors.cardBorder,
+                  backgroundColor: active ? colors.primarySoft : colors.white,
+                }}
+                accessibilityRole="button"
+                accessibilityState={{ selected: active }}
+                accessibilityLabel={active ? `${name}, Level ${lvl} von 3` : name}
+              >
+                <T s={14} w={700} c={active ? colors.primaryDark : colors.secondary}>{name}</T>
+                {active ? <SkillDots level={lvl} size={10} /> : null}
+              </Pressable>
+            );
+          })}
         </Row>
+        <T s={12} w={600} c={colors.muted} style={{ marginTop: 10 }}>
+          Nochmal tippen wechselt dein Level: ●○○ Anfänger · ●●○ Fortgeschritten · ●●● Profi
+        </T>
         <View style={{ marginTop: 'auto', paddingTop: 24 }}>
           <Row
             gap={10}
