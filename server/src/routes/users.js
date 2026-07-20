@@ -3,6 +3,8 @@ import { getUser, getHobbies } from '../repo.js';
 import { meUser, publicUser } from '../serialize.js';
 import { MONTHS, initials } from '../format.js';
 import { MEETINGS_REQUIRED } from '../logic/verification.js';
+import { suggestions } from '../logic/suggest.js';
+import { computeBadges } from '../logic/badges.js';
 
 function monthYear(iso) {
   if (!iso) return null;
@@ -120,6 +122,16 @@ export function usersRouter(db, notify = () => {}) {
     const ins = db.prepare('INSERT OR IGNORE INTO user_hobbies (userId, hobby, skillLevel) VALUES (?, ?, ?)');
     for (const { name, skillLevel } of parsed) ins.run(req.userId, name.trim(), skillLevel);
     res.json({ ok: true });
+  });
+
+  // Smart Suggestions: ähnliche Hobbys zu den eigenen
+  r.get('/me/suggestions', (req, res) => {
+    res.json(suggestions(getHobbies(db, req.userId)));
+  });
+
+  // Badges & Meilensteine (abgeleitet)
+  r.get('/me/badges', (req, res) => {
+    res.json(computeBadges(db, req.userId));
   });
 
   // Konto löschen (DSGVO/Store-Anforderung)
