@@ -46,6 +46,10 @@ function notify(db_, userId, type, payload, createdAt = new Date().toISOString()
 }
 
 const app = express();
+// Hinter nginx: genau EINEM Proxy vertrauen, damit req.ip die echte Client-IP
+// ist (sonst landen alle Nutzer im selben Rate-Limit-Topf). Bewusst 1 statt
+// true — `true` würde beliebige X-Forwarded-For-Header akzeptieren.
+app.set('trust proxy', 1);
 // CORS betrifft nur Browser-Clients (die native App ist nicht betroffen).
 // In Produktion muss CORS_ORIGINS gesetzt sein, sonst wird alles geblockt.
 const corsOrigins = (process.env.CORS_ORIGINS ?? '')
