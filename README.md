@@ -90,12 +90,25 @@ Alle Endpunkte hinter einem einfachen Rate-Limit (240 Req/Min pro IP).
   Host-CTA, „Ausgebucht", leerer Feedback-Zustand): nötige Zustände, Texte im
   Ton des Handoffs ergänzt.
 
-## Produktions-Migrationspfad
+## Produktions-Architektur (entschieden)
+
+- **Supabase** (Projekt `dfibukntvweesjmnawyz`, Region eu-west-1/Irland): Postgres 17
+  + PostGIS + Auth. Schema versioniert in `server/migrations/001_initial_schema.sql`
+  (bereits angewendet). **PostGIS liegt im Schema `extensions`, nicht in `public`** —
+  sonst wäre `spatial_ref_sys` ohne RLS über PostgREST erreichbar.
+  **RLS ist überall aktiv, bewusst ohne Policies** (deny-by-default): Nur das Backend
+  greift via `service_role` zu, die App spricht ausschließlich mit unserer API.
+- **Hostinger VPS**: Express-Backend (PM2/Docker + nginx + Let's Encrypt), prüft
+  Supabase-JWTs statt des Demo-Headers.
+- **Login**: Telefonnummer + SMS-Code (Supabase Auth über Twilio) — der Login ist
+  damit gleichzeitig Verifizierungs-Stufe 1.
+
+### Offener Migrationspfad
 
 | Demo heute | Produktion |
 |---|---|
-| SQLite (`node:sqlite`) | PostgreSQL + PostGIS (`ST_DWithin` statt Haversine) oder Supabase |
-| `X-User-Id`-Header | Supabase Auth / JWT, Row-Level-Security |
+| SQLite (`node:sqlite`, synchron) | Postgres via `pg` (async) — Datenzugriff muss umgestellt werden |
+| `X-User-Id`-Header | Supabase-JWT-Prüfung (`sub` → `req.userId`) |
 | Push = Notification-Tabelle + WS + Log | FCM/APNs (expo-notifications) |
 | SMS-/Video-Ident-Stubs | Twilio Verify / IDnow o. ä. |
 | Karten-Demo | react-native-maps (OSM/Mapbox) |
