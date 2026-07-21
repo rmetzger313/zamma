@@ -94,6 +94,18 @@ export function seed(db, now = Date.now()) {
     for (const [hobby, lvl] of hs) insHobby.run(uid, hobby, lvl);
   }
 
+  // Verfügbarkeit (Wochentage + Tageszeiten)
+  const insAvail = db.prepare('INSERT INTO user_availability (userId, kind, value) VALUES (?, ?, ?)');
+  const AVAIL_SEED = {
+    u_anna: { days: ['Mo', 'Mi', 'Fr'], slots: ['evening'] },
+    u_jonas: { days: ['Sa', 'So'], slots: ['morning'] },
+    u_helga: { days: ['Fr'], slots: ['evening'] },
+  };
+  for (const [uid, { days, slots }] of Object.entries(AVAIL_SEED)) {
+    for (const d of days) insAvail.run(uid, 'day', d);
+    for (const s of slots) insAvail.run(uid, 'slot', s);
+  }
+
   const insLoc = db.prepare('INSERT INTO user_locations (userId, name, lat, lng, radiusKm, isPrimary) VALUES (?, ?, ?, ?, ?, ?)');
   insLoc.run('u_anna', 'München & Umgebung', 48.1374, 11.5755, 25, 1);
   insLoc.run('u_anna', 'Waldkraiburg', 48.208, 12.398, 10, 0);

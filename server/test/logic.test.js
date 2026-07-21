@@ -17,6 +17,7 @@ import { compatibility } from '../src/logic/match.js';
 import { suggestions } from '../src/logic/suggest.js';
 import { computeBadges } from '../src/logic/badges.js';
 import { blockUser, getBlockedIds } from '../src/logic/moderation.js';
+import { validAvailability, getAvailability, setAvailability, WEEKDAYS } from '../src/logic/availability.js';
 
 const H = 3600000, D = 24 * H;
 
@@ -233,6 +234,31 @@ test('Block: Selbst-Block abgelehnt, Blockliste gefüllt, idempotent', () => {
   blockUser(db, 'u_anna', 'u_jonas'); // idempotent
   const blocked = getBlockedIds(db, 'u_anna');
   assert.deepEqual([...blocked], ['u_jonas']);
+});
+
+// ── Verfügbarkeit ────────────────────────────────────────────────────────
+test('Verfügbarkeit: Validierung von Tagen/Slots', () => {
+  assert.equal(validAvailability({ days: ['Mo', 'Fr'], slots: ['evening'] }), true);
+  assert.equal(validAvailability({ days: [], slots: [] }), true);
+  assert.equal(validAvailability({ days: ['Xy'], slots: [] }), false);
+  assert.equal(validAvailability({ days: [], slots: ['nachts'] }), false);
+  assert.equal(validAvailability({ days: ['Mo', 'Mo'], slots: [] }), false); // Duplikat
+  assert.equal(validAvailability({ days: 'Mo', slots: [] }), false); // kein Array
+});
+
+test('Verfügbarkeit: set/get roundtrip, kanonische Wochenreihenfolge', () => {
+  const db = openDb(':memory:');
+  seed(db);
+  setAvailability(db, 'u_lea', { days: ['Fr', 'Mo', 'Mi'], slots: ['evening', 'morning'] });
+  const a = getAvailability(db, 'u_lea');
+  assert.deepEqual(a.days, ['Mo', 'Mi', 'Fr']); // sortiert nach WEEKDAYS
+  assert.deepEqual(a.slots, ['morning', 'evening']);
+  // Überschreiben ersetzt vollständig
+  setAvailability(db, 'u_lea', { days: ['So'], slots: [] });
+  assert.deepEqual(getAvailability(db, 'u_lea'), { days: ['So'], slots: [] });
+  // Seed für Anna
+  assert.deepEqual(getAvailability(db, 'u_anna'), { days: ['Mo', 'Mi', 'Fr'], slots: ['evening'] });
+  assert.equal(WEEKDAYS.length, 7);
 });
 
 // ── Rate-Limit ───────────────────────────────────────────────────────────

@@ -98,6 +98,12 @@ export function openDb(file = join(DATA_DIR, 'zamma.db')) {
       text TEXT NOT NULL,
       createdAt TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS user_availability (
+      userId TEXT NOT NULL REFERENCES users(id),
+      kind TEXT NOT NULL CHECK (kind IN ('day','slot')),
+      value TEXT NOT NULL,
+      PRIMARY KEY (userId, kind, value)
+    );
     CREATE TABLE IF NOT EXISTS blocks (
       userId TEXT NOT NULL REFERENCES users(id),
       blockedId TEXT NOT NULL REFERENCES users(id),

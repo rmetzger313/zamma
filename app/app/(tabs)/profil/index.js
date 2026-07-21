@@ -40,6 +40,20 @@ export default function Profil() {
     Promise.all([reloadMe(), reloadSuggestions(), reloadBadges()]).finally(() => setRefreshing(false));
   }, [reloadMe, reloadSuggestions, reloadBadges]);
 
+  // Verfügbarkeit: lokaler Override gewinnt über Server-Wert (abgeleitet, kein
+  // Effect); jede Änderung wird optimistisch persistiert.
+  const [availOverride, setAvailOverride] = useState(null);
+  const avail = availOverride ?? me?.availability ?? { days: [], slots: [] };
+  const persistAvail = (next) => { setAvailOverride(next); api.saveAvailability(next).catch(() => {}); };
+  const toggleDay = (d) => {
+    const days = avail.days.includes(d) ? avail.days.filter((x) => x !== d) : [...avail.days, d];
+    persistAvail({ ...avail, days });
+  };
+  const toggleSlot = (s) => {
+    const slots = avail.slots.includes(s) ? avail.slots.filter((x) => x !== s) : [...avail.slots, s];
+    persistAvail({ ...avail, slots });
+  };
+
   // 1-Tap-Hinzufügen eines vorgeschlagenen Hobbys (Level 1)
   const addHobby = async (name) => {
     if (!me) return;
@@ -143,6 +157,61 @@ export default function Profil() {
           </Row>
         ))}
       </Row>
+
+      {avail ? (
+        <>
+          <SectionLabel>VERFÜGBAR</SectionLabel>
+          <Row gap={6} style={{ marginBottom: 10 }}>
+            {['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map((d) => {
+              const active = avail.days.includes(d);
+              return (
+                <Pressable
+                  key={d}
+                  onPress={() => toggleDay(d)}
+                  style={({ pressed }) => [
+                    {
+                      flex: 1, aspectRatio: 1, borderRadius: 10, borderWidth: 1.5,
+                      alignItems: 'center', justifyContent: 'center', minHeight: 38,
+                      borderColor: active ? colors.primary : colors.cardBorder,
+                      backgroundColor: active ? colors.primarySoft : colors.surface,
+                    },
+                    pressedFx(pressed),
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                  accessibilityLabel={`${d}${active ? ', verfügbar' : ''}`}
+                >
+                  <T s={12.5} w={800} c={active ? colors.primaryDark : colors.muted}>{d}</T>
+                </Pressable>
+              );
+            })}
+          </Row>
+          <Row gap={8} style={{ marginBottom: 18 }}>
+            {[['morning', 'Vormittags'], ['afternoon', 'Nachmittags'], ['evening', 'Abends']].map(([s, lbl]) => {
+              const active = avail.slots.includes(s);
+              return (
+                <Pressable
+                  key={s}
+                  onPress={() => toggleSlot(s)}
+                  style={({ pressed }) => [
+                    {
+                      flex: 1, borderRadius: 12, borderWidth: 1.5, paddingVertical: 9,
+                      minHeight: 40, alignItems: 'center', justifyContent: 'center',
+                      borderColor: active ? colors.primary : colors.cardBorder,
+                      backgroundColor: active ? colors.primarySoft : colors.surface,
+                    },
+                    pressedFx(pressed),
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                >
+                  <T s={12.5} w={700} c={active ? colors.primaryDark : colors.secondary}>{lbl}</T>
+                </Pressable>
+              );
+            })}
+          </Row>
+        </>
+      ) : null}
 
       {suggestions?.length ? (
         <>

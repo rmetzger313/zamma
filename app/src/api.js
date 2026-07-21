@@ -47,6 +47,7 @@ export const api = {
   matches: () => request('/matches'),
   suggestions: () => request('/users/me/suggestions'),
   badges: () => request('/users/me/badges'),
+  saveAvailability: (payload) => request('/users/me/availability', { method: 'PUT', body: payload }),
   block: (userId) => request('/blocks', { method: 'POST', body: { userId } }),
   report: (payload) => request('/reports', { method: 'POST', body: payload }),
 };

@@ -82,8 +82,10 @@ const BASE = process.env.E2E_BASE || 'http://localhost:8081';
 
   await tapTab('Profil');
   await page.getByText('ZUVERLÄSSIG', { exact: true }).waitFor();
+  await page.getByText('VERFÜGBAR').waitFor(); // Verfügbarkeitskalender
   await page.getByText('KÖNNTE DIR GEFALLEN').waitFor(); // Smart Suggestions
   await page.getByText('ABZEICHEN').waitFor(); // Badges
+  await page.getByText('DARSTELLUNG').waitFor(); // Dark-Mode-Umschalter
   await shot('10-profil');
   await tapText('›');
   await page.getByText('Du bist voll verifiziert').waitFor();

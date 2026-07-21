@@ -5,6 +5,7 @@ import { MONTHS, initials } from '../format.js';
 import { MEETINGS_REQUIRED } from '../logic/verification.js';
 import { suggestions } from '../logic/suggest.js';
 import { computeBadges } from '../logic/badges.js';
+import { getAvailability, setAvailability, validAvailability } from '../logic/availability.js';
 
 function monthYear(iso) {
   if (!iso) return null;
@@ -73,6 +74,7 @@ export function deleteAccount(db, userId, notify = () => {}) {
     db.prepare('DELETE FROM notifications WHERE userId = ?').run(userId);
     db.prepare('DELETE FROM user_hobbies WHERE userId = ?').run(userId);
     db.prepare('DELETE FROM user_locations WHERE userId = ?').run(userId);
+    db.prepare('DELETE FROM user_availability WHERE userId = ?').run(userId);
     db.prepare(`UPDATE users SET name = 'Gelöschtes Profil', avatarColor = '#A8A29E',
         city = NULL, lat = NULL, lng = NULL, bio = NULL, photo = NULL,
         verifiedPhone = 0, verifiedPhoneAt = NULL, verifiedId = 0, verifiedIdAt = NULL,
@@ -100,6 +102,7 @@ export function usersRouter(db, notify = () => {}) {
     if (!user) return res.status(404).json({ error: 'Nutzer nicht gefunden' });
     const payload = meUser(user, getHobbies(db, user.id), recentFeedbackAbout(db, user.id));
     payload.verificationSteps = verificationSteps(db, user);
+    payload.availability = getAvailability(db, user.id);
     res.json(payload);
   });
 
@@ -121,6 +124,19 @@ export function usersRouter(db, notify = () => {}) {
     db.prepare('DELETE FROM user_hobbies WHERE userId = ?').run(req.userId);
     const ins = db.prepare('INSERT OR IGNORE INTO user_hobbies (userId, hobby, skillLevel) VALUES (?, ?, ?)');
     for (const { name, skillLevel } of parsed) ins.run(req.userId, name.trim(), skillLevel);
+    res.json({ ok: true });
+  });
+
+  // Verfügbarkeit (Wochentage + Tageszeiten)
+  r.get('/me/availability', (req, res) => {
+    res.json(getAvailability(db, req.userId));
+  });
+
+  r.put('/me/availability', (req, res) => {
+    const { days = [], slots = [] } = req.body || {};
+    if (!validAvailability({ days, slots }))
+      return res.status(400).json({ error: 'Ungültige Verfügbarkeit' });
+    setAvailability(db, req.userId, { days, slots });
     res.json({ ok: true });
   });
 
