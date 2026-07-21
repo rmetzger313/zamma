@@ -1,9 +1,9 @@
 // Profil: Karte mit Avatar/Stats, Verifizierungs-Banner, Hobbys, letztes Feedback.
-import React, { useCallback } from 'react';
-import { View, ScrollView, Pressable } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, ScrollView, Pressable, RefreshControl } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { T, Avatar, VerifiedBadge, Card, SectionLabel, Row, SkillDots, pressedFx } from '../../../src/ui';
+import { T, Avatar, VerifiedBadge, Card, SectionLabel, Row, SkillDots, pressedFx, Skeleton } from '../../../src/ui';
 import { colors } from '../../../src/theme';
 import { api, useApi } from '../../../src/api';
 import { useAppState } from '../../../src/state';
@@ -27,9 +27,15 @@ export default function Profil() {
   const insets = useSafeAreaInsets();
   const { me, reloadMe } = useAppState();
   const { data: suggestions, reload: reloadSuggestions } = useApi(api.suggestions, []);
-  const { data: badges } = useApi(api.badges, []);
+  const { data: badges, reload: reloadBadges } = useApi(api.badges, []);
+  const [refreshing, setRefreshing] = useState(false);
 
   useFocusEffect(useCallback(() => { reloadMe(); reloadSuggestions(); }, [reloadMe, reloadSuggestions]));
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    Promise.all([reloadMe(), reloadSuggestions(), reloadBadges()]).finally(() => setRefreshing(false));
+  }, [reloadMe, reloadSuggestions, reloadBadges]);
 
   // 1-Tap-Hinzufügen eines vorgeschlagenen Hobbys (Level 1)
   const addHobby = async (name) => {
@@ -41,12 +47,36 @@ export default function Profil() {
     } catch {}
   };
 
-  if (!me) return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
+  if (!me) {
+    // Skeleton statt leerem Screen beim Erst-Load
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top + 16, paddingHorizontal: 20 }}>
+        <Skeleton w={90} h={20} style={{ marginBottom: 14 }} />
+        <View style={{ backgroundColor: colors.white, borderWidth: 1, borderColor: colors.cardBorder, borderRadius: 18, padding: 18, gap: 14 }}>
+          <Row gap={14}>
+            <Skeleton w={58} h={58} r={29} />
+            <View style={{ gap: 8 }}>
+              <Skeleton w={120} h={18} />
+              <Skeleton w={170} h={13} />
+            </View>
+          </Row>
+          <Row gap={8}>
+            <Skeleton w="31%" h={58} r={12} />
+            <Skeleton w="31%" h={58} r={12} />
+            <Skeleton w="31%" h={58} r={12} />
+          </Row>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: colors.bg }}
       contentContainerStyle={{ paddingTop: insets.top + 16, paddingHorizontal: 20, paddingBottom: 96 }}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} colors={[colors.primary]} />
+      }
     >
       <T s={20} w={800} style={{ marginBottom: 14 }}>Profil</T>
 

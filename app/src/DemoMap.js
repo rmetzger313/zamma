@@ -2,8 +2,8 @@
 // In Produktion durch echte Karte ersetzen (OpenStreetMap/Mapbox); die
 // Pin-Positionen kommen dann aus einer Geo-Projektion statt aus mapX/mapY.
 import React, { useEffect } from 'react';
-import { View, Pressable, Animated, StyleSheet, useAnimatedValue } from 'react-native';
-import { T, pressedFx, useReducedMotion } from './ui';
+import { View, Pressable, Animated, StyleSheet } from 'react-native';
+import { T, pressedFx, useReducedMotion, useAnimatedValue } from './ui';
 import { colors, categories } from './theme';
 
 const PIN_W = 140;

@@ -1,9 +1,9 @@
 // Chat-Liste: Gruppen-Kachel, Name, letzte Nachricht („Du: …"), Zeit, Unread-Badge.
-import React, { useCallback, useEffect } from 'react';
-import { View, ScrollView, Pressable } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { View, ScrollView, Pressable, RefreshControl } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { T, Avatar, Row, pressedFx } from '../../src/ui';
+import { T, Avatar, Row, pressedFx, Skeleton } from '../../src/ui';
 import { colors } from '../../src/theme';
 import { api, useApi } from '../../src/api';
 import { useAppState } from '../../src/state';
@@ -13,8 +13,14 @@ export default function Chats() {
   const insets = useSafeAreaInsets();
   const { wsEvent } = useAppState();
   const { data: chats, reload } = useApi(api.chats, []);
+  const [refreshing, setRefreshing] = useState(false);
 
   useFocusEffect(useCallback(() => { reload(); }, [reload]));
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    reload().finally(() => setRefreshing(false));
+  }, [reload]);
   useEffect(() => {
     if (wsEvent?.type === 'chat:message' || wsEvent?.type === 'ws:open') reload();
   }, [wsEvent, reload]);
@@ -27,7 +33,21 @@ export default function Chats() {
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingTop: 4, paddingHorizontal: 20, paddingBottom: 96, gap: 10 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} colors={[colors.primary]} />
+        }
       >
+        {chats == null
+          ? [1, 2, 3].map((i) => (
+              <Row key={i} gap={12} style={{ backgroundColor: colors.white, borderWidth: 1, borderColor: colors.cardBorder, borderRadius: 16, paddingVertical: 13, paddingHorizontal: 14 }}>
+                <Skeleton w={44} h={44} r={14} />
+                <View style={{ flex: 1, gap: 8 }}>
+                  <Skeleton w="60%" h={14} />
+                  <Skeleton w="85%" h={12} />
+                </View>
+              </Row>
+            ))
+          : null}
         {(chats ?? []).map((c) => (
           <Pressable
             key={c.seriesId}

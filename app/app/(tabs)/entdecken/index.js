@@ -1,10 +1,10 @@
 // Entdecken: Feed + Kartenansicht, Filter-Chips, Feedback-Prompt-Banner,
 // Empty-State. Karten-Toggle erhält den Filterzustand.
 import React, { useCallback, useState } from 'react';
-import { View, ScrollView, Pressable } from 'react-native';
+import { View, ScrollView, Pressable, RefreshControl } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { T, Chip, Row, Avatar, Card, SectionLabel, VerifiedBadge, pressedFx } from '../../../src/ui';
+import { T, Chip, Row, Avatar, Card, SectionLabel, VerifiedBadge, pressedFx, EventCardSkeleton } from '../../../src/ui';
 import { colors, categories } from '../../../src/theme';
 import { api, useApi } from '../../../src/api';
 import { useAppState } from '../../../src/state';
@@ -23,8 +23,14 @@ export default function Entdecken() {
   const { pendingFb, fbThanks, setFbThanks } = useAppState();
   const { data: events, reload } = useApi(() => api.events(filter), [filter]);
   const { data: people, reload: reloadPeople } = useApi(api.matches, []);
+  const [refreshing, setRefreshing] = useState(false);
 
   useFocusEffect(useCallback(() => { reload(); reloadPeople(); }, [reload, reloadPeople]));
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    Promise.all([reload(), reloadPeople()]).finally(() => setRefreshing(false));
+  }, [reload, reloadPeople]);
   // Erfolgs-Banner verschwindet erst beim echten Verlassen des Feeds (wie im
   // Prototyp) — separater Effekt mit leeren Deps, damit der Cleanup NICHT bei
   // jedem Filterwechsel (neue reload-Identität) feuert.
@@ -137,7 +143,18 @@ export default function Entdecken() {
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{ paddingTop: 2, paddingHorizontal: 20, paddingBottom: 96, gap: 12 }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} colors={[colors.primary]} />
+          }
         >
+          {/* Skeleton statt leerem Screen beim Erst-Load */}
+          {events == null ? (
+            <>
+              <EventCardSkeleton />
+              <EventCardSkeleton />
+              <EventCardSkeleton />
+            </>
+          ) : null}
           {/* Leute-Matching: Kompatibilität über gemeinsame Hobbys */}
           {filter === 'alle' && people?.length ? (
             <View>

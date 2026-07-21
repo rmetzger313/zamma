@@ -65,7 +65,7 @@ export function useApi(fn, deps = []) {
     const token = ++seq.current;
     const fresh = () => alive.current && seq.current === token;
     setLoading(true);
-    fn()
+    return fn()
       .then((d) => fresh() && (setData(d), setError(null)))
       .catch((e) => fresh() && setError(e))
       .finally(() => fresh() && setLoading(false));

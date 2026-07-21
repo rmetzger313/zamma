@@ -1,11 +1,11 @@
 // Erstellen: Titel, Kategorie-Chips, Level-Segmente, Datum/Uhrzeit, Treffpunkt,
 // Wiederkehrend-Toggle. „Veröffentlichen" legt das Event an und springt in den Feed.
 import React, { useState } from 'react';
-import { View, ScrollView, Pressable, Animated, useAnimatedValue } from 'react-native';
+import { View, ScrollView, Pressable, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { T, Chip, SectionLabel, PrimaryButton, Row, Input, pressedFx, useReducedMotion } from '../../src/ui';
+import { T, Chip, SectionLabel, PrimaryButton, Row, Input, pressedFx, useReducedMotion, useAnimatedValue } from '../../src/ui';
 import { colors, categories, font, radius, tabBarHeight } from '../../src/theme';
 import { api } from '../../src/api';
 

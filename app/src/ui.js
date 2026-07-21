@@ -1,7 +1,14 @@
 // Basis-Komponenten des Design-Systems — pixelgenau nach Handoff-Tokens.
 import React, { useEffect, useState } from 'react';
-import { Text, View, Pressable, TextInput, StyleSheet, AccessibilityInfo } from 'react-native';
+import { Text, View, Pressable, TextInput, StyleSheet, AccessibilityInfo, Animated } from 'react-native';
 import { colors, font, radius } from './theme';
+
+// RN-Web 0.21 kennt useAnimatedValue aus react-native noch nicht —
+// Lazy-Init über useState ist äquivalent (stabil, kein Ref-Zugriff im Render).
+export function useAnimatedValue(initial) {
+  const [value] = useState(() => new Animated.Value(initial));
+  return value;
+}
 
 // System-Einstellung „Bewegung reduzieren" (iOS/Android/Web via matchMedia)
 export function useReducedMotion() {
@@ -133,6 +140,44 @@ export function VerifiedBadge({ size = 16 }) {
       accessibilityLabel="Verifiziert"
     >
       <T s={size * 0.62} w={800} c={colors.white}>✓</T>
+    </View>
+  );
+}
+
+// Skeleton-Baustein: pulsierende Platzhalterfläche (statisch bei Reduced-Motion)
+export function Skeleton({ w = '100%', h = 14, r = 8, style }) {
+  const [dim, setDim] = useState(false);
+  const reduced = useReducedMotion();
+  useEffect(() => {
+    if (reduced) return undefined;
+    const t = setInterval(() => setDim((d) => !d), 700);
+    return () => clearInterval(t);
+  }, [reduced]);
+  return (
+    <View
+      style={[
+        { width: w, height: h, borderRadius: r, backgroundColor: colors.divider, opacity: dim ? 0.55 : 1 },
+        style,
+      ]}
+      accessibilityElementsHidden
+    />
+  );
+}
+
+// Skeleton einer Aktivitäts-Card (Feed lädt)
+export function EventCardSkeleton() {
+  return (
+    <View style={[styles.card, { borderRadius: radius.cardLg, padding: 16, gap: 10 }]}>
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        <Skeleton w={64} h={22} r={999} />
+        <Skeleton w={96} h={22} r={999} />
+      </View>
+      <Skeleton w="75%" h={17} />
+      <Skeleton w="55%" h={13} />
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 }}>
+        <Skeleton w={28} h={28} r={14} />
+        <Skeleton w={90} h={13} />
+      </View>
     </View>
   );
 }
