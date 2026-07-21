@@ -41,7 +41,7 @@ export default function ChatThread() {
     if (!text || !thread) return;
     setDraft('');
     const optimistic = {
-      id: `tmp_${Date.now()}`, who: 'ich', initials: 'DU', color: '#7a5fd5',
+      id: `tmp_${Date.now()}`, who: 'ich', initials: 'DU', color: '#8B5CF6',
       text, mine: true, createdAt: new Date().toISOString(),
     };
     setData({ ...thread, messages: [...thread.messages, optimistic] });

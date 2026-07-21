@@ -1,38 +1,60 @@
-// Design-Tokens laut Handoff-README — Farben, Typografie, Radii, Spacing.
+// Design-Tokens — Zamma-Brand-Palette laut DESIGN-LOOP.md (Rebranding-Beschluss
+// Juli 2026): Koralle (Wärme & Verbundenheit) + Petrol (Vertrauen & Ruhe) auf
+// warmem Neutral. Typografie/Radii/Spacing stammen weiter aus dem Layout des
+// Design-Handoffs. Historie: docs/qa-report.md.
 
 export const colors = {
-  bg: '#faf6f0',           // App-Hintergrund
-  pageBg: '#efe8dd',       // Seiten-Hintergrund außen
-  ink: '#2b2016',          // Text
-  secondary: '#5a4f42',    // Sekundärtext
-  muted: '#8a7d6e',
-  disabled: '#a99a85',
-  deco: '#c9bda9',
-  cardBorder: '#ece3d6',
-  divider: '#f4efe7',
-  primary: '#e05d38',      // Terracotta
-  primaryDark: '#b94528',  // Hover/Links
-  primarySoft: '#fbe9e2',
-  success: '#2d7a5f',      // Erfolg/Verifizierung
-  successSoft: '#e3f0e9',
-  successDark: '#22543f',
-  amber: '#c78f2e',        // Skill/Sterne
-  amberBright: '#f2a541',
-  amberSoft: '#f9efd9',
-  btnDisabledBg: '#e2d8c8',
-  dashedBorder: '#d9cfc0',
-  overlay: 'rgba(43,32,22,.45)',
-  white: '#fff',
-  tabBarBg: 'rgba(255,252,247,.94)',
-  amberDarkText: '#8a6a1f',
+  bg: '#FAFAF9',           // background (neutral-50)
+  pageBg: '#F5F5F4',       // neutral-100
+  ink: '#1C1917',          // Text (neutral-900)
+  secondary: '#44403C',    // Sekundärtext (neutral-700)
+  muted: '#78716C',        // neutral-500
+  disabled: '#A8A29E',     // neutral-400
+  deco: '#D6D3D1',         // neutral-300
+  cardBorder: '#E7E5E4',   // neutral-200
+  divider: '#F5F5F4',      // neutral-100
+  primary: '#FF6B42',      // Koralle (primary-500)
+  primaryDark: '#C43D1E',  // primary-700 — Links/aktive Chip-Texte
+  primarySoft: '#FFE8E0',  // primary-100
+  success: '#0F9B8E',      // Petrol (secondary-500) — Vertrauen/Verifizierung
+  successSoft: '#CCFBF1',  // secondary-100
+  successDark: '#0A6159',  // secondary-700
+  amber: '#D97706',        // Skill/Sterne (Text-tauglich)
+  amberBright: '#F59E0B',  // warning-500 — gefüllte Sterne
+  amberSoft: '#FEF3C7',
+  amberDarkText: '#92400E',
+  error: '#EF4444',        // destruktive Aktionen (Absagen, Blockieren)
+  errorSoft: '#FEE2E2',
+  btnDisabledBg: '#E7E5E4',
+  dashedBorder: '#D6D3D1',
+  overlay: 'rgba(28,25,23,0.6)',
+  white: '#FFFFFF',
+  tabBarBg: 'rgba(250,250,249,0.94)',
+  bgTransparent: 'rgba(250,250,249,0)',
+};
+
+// Dark-Mode-Palette (Tokens vorbereitet — Verdrahtung ist Backlog-Item 6)
+export const darkColors = {
+  ...colors,
+  bg: '#1C1917',
+  pageBg: '#1C1917',
+  ink: '#FAFAF9',
+  secondary: '#D6D3D1',
+  muted: '#A8A29E',
+  cardBorder: '#44403C',
+  divider: '#292524',
+  white: '#292524',        // surface
+  tabBarBg: 'rgba(28,25,23,0.94)',
+  bgTransparent: 'rgba(28,25,23,0)',
+  overlay: 'rgba(0,0,0,0.7)',
 };
 
 export const categories = {
-  sport: { label: 'Sport', color: '#e05d38', bg: '#fbe9e2' },
-  spiele: { label: 'Spiele', color: '#7a5fd5', bg: '#ece7fa' },
-  kreativ: { label: 'Kreativ', color: '#c78f2e', bg: '#f9efd9' },
-  outdoor: { label: 'Outdoor', color: '#2d7a5f', bg: '#e3f0e9' },
-  kochen: { label: 'Kochen', color: '#b94572', bg: '#f9e4ec' },
+  sport: { label: 'Sport', color: '#FF6B42', bg: '#FFE8E0' },
+  spiele: { label: 'Spiele', color: '#8B5CF6', bg: '#EDE9FE' },
+  kreativ: { label: 'Kreativ', color: '#D97706', bg: '#FEF3C7' },
+  outdoor: { label: 'Outdoor', color: '#0F9B8E', bg: '#CCFBF1' },
+  kochen: { label: 'Kochen', color: '#DB2777', bg: '#FCE7F3' },
 };
 
 // Nunito Sans — jede Gewichtung ist in RN eine eigene fontFamily

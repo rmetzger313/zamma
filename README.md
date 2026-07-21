@@ -65,6 +65,13 @@ Alle Endpunkte hinter einem einfachen Rate-Limit (240 Req/Min pro IP).
 
 ## Bewusste Entscheidungen
 
+- **Rebranding (Juli 2026, per Nutzer-Entscheid):** Die Farb-Tokens wurden vom
+  Handoff-Terracotta auf die DESIGN-LOOP-Brand-Palette migriert (Koralle
+  `#FF6B42`, Petrol `#0F9B8E` für Vertrauen/Verifizierung, warme Neutrals,
+  semantisches Error-Rot für destruktive Aktionen). Typografie, Radii, Spacing
+  und Layout stammen weiterhin aus dem Design-Handoff. Dark-Palette liegt als
+  `darkColors` in `theme.js` bereit (Verdrahtung offen).
+
 - **Seed-Termine dynamisch** relativ zu „jetzt", damit Feedback-Fenster, Reminder
   und Recurrence jederzeit live demonstrierbar sind (Format wie im Design).
 - **Karte** bleibt die stilisierte Demo-Illustration aus dem Prototyp — die README

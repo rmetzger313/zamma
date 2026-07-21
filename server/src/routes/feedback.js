@@ -48,7 +48,7 @@ export function feedbackRouter(db, notify) {
           hostId: e.hostId,
           hostName: host.name,
           groupInitials: group?.initials ?? e.title.slice(0, 2).toUpperCase(),
-          groupColor: group?.color ?? '#7a5fd5',
+          groupColor: group?.color ?? '#8B5CF6',
           promptLabel: promptLabel(e.title),
         };
       })

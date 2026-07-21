@@ -73,7 +73,7 @@ export function deleteAccount(db, userId, notify = () => {}) {
     db.prepare('DELETE FROM notifications WHERE userId = ?').run(userId);
     db.prepare('DELETE FROM user_hobbies WHERE userId = ?').run(userId);
     db.prepare('DELETE FROM user_locations WHERE userId = ?').run(userId);
-    db.prepare(`UPDATE users SET name = 'Gelöschtes Profil', avatarColor = '#a99a85',
+    db.prepare(`UPDATE users SET name = 'Gelöschtes Profil', avatarColor = '#A8A29E',
         city = NULL, lat = NULL, lng = NULL, bio = NULL, photo = NULL,
         verifiedPhone = 0, verifiedPhoneAt = NULL, verifiedId = 0, verifiedIdAt = NULL,
         avgRating = NULL WHERE id = ?`).run(userId);

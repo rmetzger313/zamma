@@ -75,7 +75,7 @@ export default function EventDetail() {
       joined: true,
       joinedCount: event.joinedCount + 1,
       spotsLabel: `${event.joinedCount + 1} / ${event.maxSpots} dabei`,
-      participants: [{ id: 'me', name: 'Du', initials: 'DU', avatarColor: '#7a5fd5', isMe: true }, ...event.participants],
+      participants: [{ id: 'me', name: 'Du', initials: 'DU', avatarColor: '#8B5CF6', isMe: true }, ...event.participants],
     });
     try {
       const fresh = await api.join(event.id);
@@ -216,9 +216,9 @@ export default function EventDetail() {
 
       {/* Sticky-CTA über der Tab-Bar */}
       <View style={{ position: 'absolute', left: 0, right: 0, bottom: bottomOffset }}>
-        <LinearGradient colors={['rgba(250,246,240,0)', colors.bg]} locations={[0, 0.4]} style={{ paddingTop: 14, paddingHorizontal: 20, paddingBottom: 14 }}>
+        <LinearGradient colors={[colors.bgTransparent, colors.bg]} locations={[0, 0.4]} style={{ paddingTop: 14, paddingHorizontal: 20, paddingBottom: 14 }}>
           {actionError ? (
-            <T s={13} w={700} c={colors.primaryDark} center style={{ marginBottom: 8 }}>{actionError}</T>
+            <T s={13} w={700} c={colors.error} center style={{ marginBottom: 8 }}>{actionError}</T>
           ) : null}
           {event.isHost ? (
             <PrimaryButton label="Du bist Host dieses Treffens" disabled />
@@ -226,7 +226,7 @@ export default function EventDetail() {
             <>
               <PrimaryButton label="✓ Du bist dabei" bg={colors.successSoft} fg={colors.success} onPress={openCancelModal} />
               <Pressable onPress={openCancelModal} style={{ paddingTop: 10, minHeight: 44, alignItems: 'center' }} accessibilityRole="button">
-                <T s={13.5} w={800} c={colors.primaryDark}>Absagen</T>
+                <T s={13.5} w={800} c={colors.error}>Absagen</T>
               </Pressable>
             </>
           ) : full ? (
@@ -258,7 +258,7 @@ export default function EventDetail() {
                   style={{ paddingVertical: 12, minHeight: 44 }}
                   accessibilityRole="button"
                 >
-                  <T s={14.5} w={700} c={colors.primaryDark}>Blockieren</T>
+                  <T s={14.5} w={700} c={colors.error}>Blockieren</T>
                 </Pressable>
               </>
             ) : hostMenu === 'report' ? (
@@ -339,7 +339,7 @@ export default function EventDetail() {
                 onPress={confirmCancel}
                 style={({ pressed }) => [
                   {
-                    flex: 1, backgroundColor: colors.primaryDark, borderRadius: 12, padding: 12,
+                    flex: 1, backgroundColor: colors.error, borderRadius: 12, padding: 12,
                     minHeight: 44, alignItems: 'center', justifyContent: 'center',
                   },
                   pressedFx(pressed),

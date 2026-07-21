@@ -106,8 +106,8 @@ export default function FeedbackScreen() {
         <Row gap={8} style={{ flexWrap: 'wrap', marginBottom: 22 }}>
           {CHIPS.map((c) => {
             const active = !!tags[c.tag];
-            const color = c.negative ? colors.primaryDark : colors.success;
-            const bg = c.negative ? colors.primarySoft : colors.successSoft;
+            const color = c.negative ? colors.error : colors.success;
+            const bg = c.negative ? colors.errorSoft : colors.successSoft;
             return (
               <Pressable
                 key={c.tag}
@@ -151,7 +151,7 @@ export default function FeedbackScreen() {
           </T>
         </View>
         {error ? (
-          <T s={13} w={700} c={colors.primaryDark} style={{ marginBottom: 10 }}>{error}</T>
+          <T s={13} w={700} c={colors.error} style={{ marginBottom: 10 }}>{error}</T>
         ) : null}
         <PrimaryButton label="Feedback senden" disabled={!stars || !item} onPress={submit} />
       </ScrollView>

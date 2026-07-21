@@ -95,7 +95,7 @@ export function eventsRouter(db, notify) {
     // Gruppenchat der neuen Serie
     db.prepare('INSERT INTO chat_groups (seriesId, name, initials, color) VALUES (?, ?, ?, ?)')
       .run(seriesId, String(title).trim(), initials(String(title).trim()),
-        { sport: '#e05d38', spiele: '#7a5fd5', kreativ: '#c78f2e', outdoor: '#2d7a5f', kochen: '#b94572' }[category || 'sport']);
+        { sport: '#FF6B42', spiele: '#8B5CF6', kreativ: '#D97706', outdoor: '#0F9B8E', kochen: '#DB2777' }[category || 'sport']);
     db.prepare('INSERT INTO chat_members (seriesId, userId, lastReadAt) VALUES (?, ?, ?)')
       .run(seriesId, req.userId, new Date(nowMs).toISOString());
     const event = getEvent(db, id);

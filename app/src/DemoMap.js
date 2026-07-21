@@ -76,11 +76,11 @@ export function DemoMap({ events, onOpen }) {
       <View style={[styles.street, { left: '-10%', right: '-10%', top: '38%', height: '2%', transform: [{ rotate: '35deg' }] }]} />
       {/* Grünflächen + Isar */}
       <View style={[styles.green, { left: '8%', top: '8%', width: '34%', height: '26%' }]} />
-      <T s={10} w={800} c="#8ba37e" ls={0.5} style={{ position: 'absolute', left: '14%', top: '12%' }}>
+      <T s={10} w={800} c="#66A088" ls={0.5} style={{ position: 'absolute', left: '14%', top: '12%' }}>
         ENGLISCHER GARTEN
       </T>
       <View style={styles.isar} />
-      <T s={10} w={800} c="#7fa0b0" ls={1} style={{ position: 'absolute', left: '56%', top: '44%', transform: [{ rotate: '76deg' }] }}>
+      <T s={10} w={800} c="#6E9DB8" ls={1} style={{ position: 'absolute', left: '56%', top: '44%', transform: [{ rotate: '76deg' }] }}>
         ISAR
       </T>
       <View style={[styles.green, { right: '6%', bottom: '22%', width: '28%', height: '20%', borderRadius: 20 }]} />
@@ -100,12 +100,12 @@ export function DemoMap({ events, onOpen }) {
 }
 
 const styles = StyleSheet.create({
-  map: { flex: 1, backgroundColor: '#efe9dc', overflow: 'hidden' },
-  street: { position: 'absolute', backgroundColor: '#e2dac9' },
-  green: { position: 'absolute', backgroundColor: '#dbe7d4', borderRadius: 24 },
+  map: { flex: 1, backgroundColor: '#F5F5F4', overflow: 'hidden' },
+  street: { position: 'absolute', backgroundColor: '#E7E5E4' },
+  green: { position: 'absolute', backgroundColor: '#D8EDE0', borderRadius: 24 },
   isar: {
     position: 'absolute', left: '52%', top: '-6%', width: '12%', height: '115%',
-    backgroundColor: '#cfe0e8', borderRadius: 40, transform: [{ rotate: '14deg' }],
+    backgroundColor: '#CBE5F2', borderRadius: 40, transform: [{ rotate: '14deg' }],
   },
   pinLabel: {
     borderRadius: 999, paddingVertical: 5, paddingHorizontal: 10,

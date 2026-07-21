@@ -89,10 +89,10 @@ export default function Erstellen() {
             onChangeText={(t) => { setTitle(t); if (t.trim()) setTitleError(false); }}
             placeholder="z. B. Feierabend-Radrunde"
             accessibilityLabel="Titel"
-            style={[inputStyle, titleError && { borderColor: colors.primaryDark }]}
+            style={[inputStyle, titleError && { borderColor: colors.error }]}
           />
           {titleError ? (
-            <T s={12.5} w={700} c={colors.primaryDark} style={{ marginTop: 6 }}>Bitte gib einen Titel ein.</T>
+            <T s={12.5} w={700} c={colors.error} style={{ marginTop: 6 }}>Bitte gib einen Titel ein.</T>
           ) : null}
         </View>
         <View>
@@ -189,9 +189,9 @@ export default function Erstellen() {
         </Pressable>
       </ScrollView>
       <View style={{ position: 'absolute', left: 0, right: 0, bottom: tabBarHeight(insets) }}>
-        <LinearGradient colors={['rgba(250,246,240,0)', colors.bg]} locations={[0, 0.4]} style={{ paddingTop: 10, paddingHorizontal: 20, paddingBottom: 10 }}>
+        <LinearGradient colors={[colors.bgTransparent, colors.bg]} locations={[0, 0.4]} style={{ paddingTop: 10, paddingHorizontal: 20, paddingBottom: 10 }}>
           {error ? (
-            <T s={13} w={700} c={colors.primaryDark} center style={{ marginBottom: 8 }}>{error}</T>
+            <T s={13} w={700} c={colors.error} center style={{ marginBottom: 8 }}>{error}</T>
           ) : null}
           <PrimaryButton label={busy ? 'Wird veröffentlicht…' : 'Veröffentlichen'} onPress={publish} />
         </LinearGradient>

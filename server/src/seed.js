@@ -27,37 +27,37 @@ export function seed(db, now = Date.now()) {
 
   const users = [
     // Demo-Nutzerin (angemeldet)
-    { id: 'u_anna', name: 'Anna M.', avatarColor: '#7a5fd5', city: 'München', lat: 48.1374, lng: 11.5755,
+    { id: 'u_anna', name: 'Anna M.', avatarColor: '#8B5CF6', city: 'München', lat: 48.1374, lng: 11.5755,
       joinDate: '2026-03-10T10:00:00.000Z', verifiedPhone: 1, verifiedPhoneAt: '2026-03-10T10:05:00.000Z',
       verifiedId: 1, verifiedIdAt: '2026-03-12T18:00:00.000Z',
       reliabilityScore: 96, meetingsAttended: 14, avgRating: 4.9, noShowCount: 0 },
     // Hosts
-    { id: 'u_jonas', name: 'Jonas K.', avatarColor: '#2d7a5f', city: 'München', lat: 48.152, lng: 11.593,
+    { id: 'u_jonas', name: 'Jonas K.', avatarColor: '#0F9B8E', city: 'München', lat: 48.152, lng: 11.593,
       joinDate: '2025-09-01T10:00:00.000Z', verifiedPhone: 1, verifiedId: 1,
       reliabilityScore: 98, meetingsAttended: 31, avgRating: 4.8, noShowCount: 0 },
-    { id: 'u_helga', name: 'Helga B.', avatarColor: '#b94572', city: 'Waldkraiburg', lat: 48.208, lng: 12.398,
+    { id: 'u_helga', name: 'Helga B.', avatarColor: '#DB2777', city: 'Waldkraiburg', lat: 48.208, lng: 12.398,
       joinDate: '2025-06-15T10:00:00.000Z', verifiedPhone: 1, verifiedId: 1,
       reliabilityScore: 100, meetingsAttended: 22, avgRating: 5.0, noShowCount: 0 },
-    { id: 'u_miriam', name: 'Miriam S.', avatarColor: '#7a5fd5', city: 'München', lat: 48.13, lng: 11.6,
+    { id: 'u_miriam', name: 'Miriam S.', avatarColor: '#8B5CF6', city: 'München', lat: 48.13, lng: 11.6,
       joinDate: '2025-11-20T10:00:00.000Z', verifiedPhone: 1, verifiedId: 1,
       reliabilityScore: 95, meetingsAttended: 17, avgRating: 4.7, noShowCount: 0 },
     // David ist NICHT voll verifiziert (kein Video-Ident) → nachrangig sortiert
-    { id: 'u_david', name: 'David R.', avatarColor: '#c78f2e', city: 'München', lat: 48.14, lng: 11.58,
+    { id: 'u_david', name: 'David R.', avatarColor: '#D97706', city: 'München', lat: 48.14, lng: 11.58,
       joinDate: '2026-05-02T10:00:00.000Z', verifiedPhone: 1, verifiedId: 0,
       reliabilityScore: 89, meetingsAttended: 6, avgRating: 4.5, noShowCount: 0 },
-    { id: 'u_sepp', name: 'Sepp L.', avatarColor: '#2d7a5f', city: 'Waldkraiburg', lat: 48.206, lng: 12.4,
+    { id: 'u_sepp', name: 'Sepp L.', avatarColor: '#0F9B8E', city: 'Waldkraiburg', lat: 48.206, lng: 12.4,
       joinDate: '2025-03-10T10:00:00.000Z', verifiedPhone: 1, verifiedId: 1,
       reliabilityScore: 97, meetingsAttended: 40, avgRating: 4.9, noShowCount: 0 },
-    { id: 'u_luca', name: 'Luca M.', avatarColor: '#e05d38', city: 'München', lat: 48.16, lng: 11.55,
+    { id: 'u_luca', name: 'Luca M.', avatarColor: '#FF6B42', city: 'München', lat: 48.16, lng: 11.55,
       joinDate: '2026-01-08T10:00:00.000Z', verifiedPhone: 1, verifiedId: 1,
       reliabilityScore: 93, meetingsAttended: 11, avgRating: 4.6, noShowCount: 0 },
     // Teilnehmende
-    ...[['u_lea', 'Lea', '#e05d38'], ['u_tom', 'Tom', '#7a5fd5'], ['u_sofia', 'Sofia', '#c78f2e'],
-      ['u_ben', 'Ben', '#b94572'], ['u_kurt', 'Kurt', '#2d7a5f'], ['u_ines', 'Ines', '#e05d38'],
-      ['u_ali', 'Ali', '#7a5fd5'], ['u_mia', 'Mia', '#b94572'], ['u_otto', 'Otto', '#c78f2e'],
-      ['u_paul', 'Paul', '#c78f2e'], ['u_nina', 'Nina', '#2d7a5f'], ['u_mara', 'Mara', '#b94572'],
-      ['u_jens', 'Jens', '#e05d38'], ['u_kim', 'Kim', '#7a5fd5'], ['u_emma', 'Emma', '#7a5fd5'],
-      ['u_ravi', 'Ravi', '#2d7a5f'], ['u_julia', 'Julia', '#c78f2e'],
+    ...[['u_lea', 'Lea', '#FF6B42'], ['u_tom', 'Tom', '#8B5CF6'], ['u_sofia', 'Sofia', '#D97706'],
+      ['u_ben', 'Ben', '#DB2777'], ['u_kurt', 'Kurt', '#0F9B8E'], ['u_ines', 'Ines', '#FF6B42'],
+      ['u_ali', 'Ali', '#8B5CF6'], ['u_mia', 'Mia', '#DB2777'], ['u_otto', 'Otto', '#D97706'],
+      ['u_paul', 'Paul', '#D97706'], ['u_nina', 'Nina', '#0F9B8E'], ['u_mara', 'Mara', '#DB2777'],
+      ['u_jens', 'Jens', '#FF6B42'], ['u_kim', 'Kim', '#8B5CF6'], ['u_emma', 'Emma', '#8B5CF6'],
+      ['u_ravi', 'Ravi', '#0F9B8E'], ['u_julia', 'Julia', '#D97706'],
     ].map(([id, name, avatarColor]) => ({
       id, name, avatarColor, city: 'München', lat: 48.14, lng: 11.57,
       joinDate: '2026-02-01T10:00:00.000Z', verifiedPhone: 1, verifiedId: 1,
@@ -186,13 +186,13 @@ export function seed(db, now = Date.now()) {
 
   // ── Chats (Gruppenchat je Event-Serie) ─────────────────────────────────
   const insGroup = db.prepare('INSERT INTO chat_groups (seriesId, name, initials, color) VALUES (?, ?, ?, ?)');
-  insGroup.run('ser_lauf', 'Lauftreff Englischer Garten', 'LG', '#2d7a5f');
-  insGroup.run('ser_bsa', 'Brettspielabend Waldkraiburg', 'BW', '#7a5fd5');
-  insGroup.run('ser_boulder', 'Bouldern für Einsteiger', initials('Bouldern Einsteiger'), '#e05d38');
-  insGroup.run('ser_foto', 'Fotowalk durch die Altstadt', 'FA', '#c78f2e');
-  insGroup.run('ser_schafkopf', 'Schafkopf-Runde im Wirtshaus', 'SW', '#7a5fd5');
-  insGroup.run('ser_pasta', 'Gemeinsam kochen: Pasta-Abend', 'GP', '#b94572');
-  insGroup.run('ser_foto_past', 'Fotowalk Haidhausen', 'FH', '#c78f2e');
+  insGroup.run('ser_lauf', 'Lauftreff Englischer Garten', 'LG', '#0F9B8E');
+  insGroup.run('ser_bsa', 'Brettspielabend Waldkraiburg', 'BW', '#8B5CF6');
+  insGroup.run('ser_boulder', 'Bouldern für Einsteiger', initials('Bouldern Einsteiger'), '#FF6B42');
+  insGroup.run('ser_foto', 'Fotowalk durch die Altstadt', 'FA', '#D97706');
+  insGroup.run('ser_schafkopf', 'Schafkopf-Runde im Wirtshaus', 'SW', '#8B5CF6');
+  insGroup.run('ser_pasta', 'Gemeinsam kochen: Pasta-Abend', 'GP', '#DB2777');
+  insGroup.run('ser_foto_past', 'Fotowalk Haidhausen', 'FH', '#D97706');
 
   const insMember = db.prepare('INSERT INTO chat_members (seriesId, userId, lastReadAt) VALUES (?, ?, ?)');
   const msgTimes = {
