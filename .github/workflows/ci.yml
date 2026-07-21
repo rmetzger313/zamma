@@ -29,6 +29,9 @@ jobs:
       - name: Install app deps
         working-directory: app
         run: npm ci
+      - name: Lint
+        working-directory: app
+        run: npm run lint
       - name: Produktions-Export (Web)
         working-directory: app
         run: npx expo export --platform web

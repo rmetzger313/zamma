@@ -69,7 +69,8 @@ export function useApi(fn, deps = []) {
       .then((d) => fresh() && (setData(d), setError(null)))
       .catch((e) => fresh() && setError(e))
       .finally(() => fresh() && setLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Generischer Datenhook: Deps kommen bewusst vom Aufrufer
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/use-memo
   }, deps);
   useEffect(() => { load(); }, [load]);
   return { data, error, loading, reload: load, setData };

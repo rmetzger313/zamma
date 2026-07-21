@@ -29,7 +29,7 @@ export default function Profil() {
   const { data: suggestions, reload: reloadSuggestions } = useApi(api.suggestions, []);
   const { data: badges } = useApi(api.badges, []);
 
-  useFocusEffect(useCallback(() => { reloadMe(); reloadSuggestions(); }, []));
+  useFocusEffect(useCallback(() => { reloadMe(); reloadSuggestions(); }, [reloadMe, reloadSuggestions]));
 
   // 1-Tap-Hinzufügen eines vorgeschlagenen Hobbys (Level 1)
   const addHobby = async (name) => {

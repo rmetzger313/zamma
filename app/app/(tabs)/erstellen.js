@@ -1,7 +1,7 @@
 // Erstellen: Titel, Kategorie-Chips, Level-Segmente, Datum/Uhrzeit, Treffpunkt,
 // Wiederkehrend-Toggle. „Veröffentlichen" legt das Event an und springt in den Feed.
-import React, { useRef, useState } from 'react';
-import { View, ScrollView, Pressable, Animated } from 'react-native';
+import React, { useState } from 'react';
+import { View, ScrollView, Pressable, Animated, useAnimatedValue } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -37,7 +37,7 @@ export default function Erstellen() {
   const [titleError, setTitleError] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
-  const knob = useRef(new Animated.Value(0)).current;
+  const knob = useAnimatedValue(0);
 
   const toggleRec = () => {
     Animated.timing(knob, { toValue: rec ? 0 : 1, duration: 200, useNativeDriver: false }).start();

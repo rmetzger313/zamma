@@ -1,8 +1,8 @@
 // Stilisierte Kartenansicht (Demo) — Nachbau der Prototyp-Illustration.
 // In Produktion durch echte Karte ersetzen (OpenStreetMap/Mapbox); die
 // Pin-Positionen kommen dann aus einer Geo-Projektion statt aus mapX/mapY.
-import React, { useEffect, useRef } from 'react';
-import { View, Pressable, Animated, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Pressable, Animated, StyleSheet, useAnimatedValue } from 'react-native';
 import { T } from './ui';
 import { colors, categories } from './theme';
 
@@ -35,7 +35,7 @@ function Pin({ event, onPress }) {
 
 // Eigener Standort: pulsierender Terracotta-Punkt
 function SelfDot() {
-  const pulse = useRef(new Animated.Value(0)).current;
+  const pulse = useAnimatedValue(0);
   useEffect(() => {
     const loop = Animated.loop(
       Animated.sequence([

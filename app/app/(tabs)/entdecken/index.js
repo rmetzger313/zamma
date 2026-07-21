@@ -29,7 +29,7 @@ export default function Entdecken() {
   // Prototyp) — separater Effekt mit leeren Deps, damit der Cleanup NICHT bei
   // jedem Filterwechsel (neue reload-Identität) feuert.
   useFocusEffect(
-    useCallback(() => () => setFbThanks(false), [])
+    useCallback(() => () => setFbThanks(false), [setFbThanks])
   );
 
   const openEvent = (e) => router.push(`/(tabs)/entdecken/event/${e.id}`);

@@ -1,5 +1,5 @@
 // Leichter App-State: Profil, Onboarding-Status, Feedback-Banner, WS-Verbindung.
-import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { api, wsUrl } from './api';
 
 const AppState = createContext(null);
@@ -12,13 +12,14 @@ export function AppStateProvider({ children }) {
   const [wsEvent, setWsEvent] = useState(null); // letztes Live-Event (Chat/Push)
   const wsRef = useRef(null);
 
-  const reloadMe = () => api.me().then(setMe).catch(() => {});
-  const reloadPendingFb = () => api.pendingFeedback().then(setPendingFb).catch(() => {});
+  // Stabile Identitäten — Konsumenten dürfen sie gefahrlos in Effect-Deps nehmen
+  const reloadMe = useCallback(() => api.me().then(setMe).catch(() => {}), []);
+  const reloadPendingFb = useCallback(() => api.pendingFeedback().then(setPendingFb).catch(() => {}), []);
 
   useEffect(() => {
     reloadMe();
     reloadPendingFb();
-  }, []);
+  }, [reloadMe, reloadPendingFb]);
 
   // Live-Updates (Chat-Nachrichten, Push-Stub) mit Reconnect.
   // ws:open signalisiert Konsumenten, nach einer Downtime nachzuladen.
@@ -48,7 +49,7 @@ export function AppStateProvider({ children }) {
 
   const value = useMemo(
     () => ({ me, reloadMe, onboarded, setOnboarded, pendingFb, reloadPendingFb, fbThanks, setFbThanks, wsEvent }),
-    [me, onboarded, pendingFb, fbThanks, wsEvent]
+    [me, reloadMe, onboarded, pendingFb, reloadPendingFb, fbThanks, wsEvent]
   );
   return <AppState.Provider value={value}>{children}</AppState.Provider>;
 }
