@@ -76,6 +76,7 @@ const BASE = process.env.E2E_BASE || 'http://localhost:8081';
   await shot('08-chats');
   await tapText('Top. Wetter sieht gut aus, ca. 21 Grad.');
   await page.getByText('6 Teilnehmer · Sa 09:00').waitFor();
+  await page.getByText('Ihr teilt:').waitFor(); // Icebreaker (Anna ∩ Jonas: Laufen)
   await shot('09-chat-thread');
   await tapText('←');
 

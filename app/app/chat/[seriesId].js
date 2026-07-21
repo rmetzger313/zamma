@@ -75,6 +75,19 @@ export default function ChatThread() {
           <T s={12} w={700} c={colors.muted}>{thread?.sub ?? ''}</T>
         </View>
       </Row>
+      {/* Icebreaker: Hobby-Kontext direkt im Chat */}
+      {thread?.sharedHobbies?.length ? (
+        <Row
+          gap={8}
+          style={{
+            marginTop: 10, marginHorizontal: 20, backgroundColor: colors.successSoft,
+            borderRadius: 12, paddingVertical: 9, paddingHorizontal: 13, alignSelf: 'center',
+          }}
+        >
+          <T s={12.5} w={800} c={colors.successDark}>Ihr teilt:</T>
+          <T s={12.5} w={700} c={colors.successDark}>{thread.sharedHobbies.join(' · ')}</T>
+        </Row>
+      ) : null}
       <ScrollView
         ref={scrollRef}
         style={{ flex: 1 }}

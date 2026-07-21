@@ -76,12 +76,28 @@ export function chatsRouter(db, notify, broadcast) {
           createdAt: m.createdAt,
         };
       });
+    // Icebreaker: gemeinsame Hobbys mit dem Host der Serie („Ihr teilt: …")
+    const latest = db
+      .prepare('SELECT hostId FROM events WHERE seriesId = ? ORDER BY datetime DESC LIMIT 1')
+      .get(req.params.seriesId);
+    let sharedHobbies = [];
+    if (latest && latest.hostId !== req.userId) {
+      const mine = new Set(
+        db.prepare('SELECT hobby FROM user_hobbies WHERE userId = ?').all(req.userId).map((h) => h.hobby)
+      );
+      sharedHobbies = db
+        .prepare('SELECT hobby FROM user_hobbies WHERE userId = ? ORDER BY rowid')
+        .all(latest.hostId)
+        .map((h) => h.hobby)
+        .filter((h) => mine.has(h));
+    }
     res.json({
       seriesId: group.seriesId,
       name: group.name,
       initials: group.initials,
       color: group.color,
       sub: groupSub(db, group.seriesId),
+      sharedHobbies,
       messages,
     });
   });
