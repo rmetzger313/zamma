@@ -1,6 +1,11 @@
 node_modules/
 e2e/node_modules/
 server/data/
+app/.env
+server/.env
+server/.env.*
+!server/.env.example
+app/.env.local
 app/.expo/
 app/dist/
 app/web-build/
