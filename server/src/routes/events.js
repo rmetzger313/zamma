@@ -6,6 +6,7 @@ import { matchLocations, DEFAULT_RADIUS_KM } from '../logic/geo.js';
 import { eventEndMs } from '../logic/feedback.js';
 import { isDemoted } from '../logic/verification.js';
 import { getBlockedIds } from '../logic/moderation.js';
+import { LIMITS, withinLimit, optionalWithinLimit } from '../logic/limits.js';
 import { cancelPreview, isLateCancel, applyLateCancel } from '../logic/score.js';
 import { initials } from '../format.js';
 
@@ -70,6 +71,12 @@ export function eventsRouter(db, notify) {
     const nowMs = Date.now();
     const { title, category, skillLevel, date, time, datetime, locationName, recurrence } = req.body || {};
     if (!title || !String(title).trim()) return res.status(400).json({ error: 'Titel erforderlich' });
+    if (!withinLimit(title, LIMITS.eventTitle))
+      return res.status(400).json({ error: `Titel zu lang (max. ${LIMITS.eventTitle} Zeichen)` });
+    if (!optionalWithinLimit(req.body.description, LIMITS.eventDescription))
+      return res.status(400).json({ error: `Beschreibung zu lang (max. ${LIMITS.eventDescription} Zeichen)` });
+    if (!optionalWithinLimit(locationName, LIMITS.locationName))
+      return res.status(400).json({ error: `Treffpunkt zu lang (max. ${LIMITS.locationName} Zeichen)` });
     if (category && !(category in CATEGORIES)) return res.status(400).json({ error: 'Unbekannte Kategorie' });
     if (skillLevel != null && ![1, 2, 3].includes(skillLevel))
       return res.status(400).json({ error: 'Level muss 1, 2 oder 3 sein' });

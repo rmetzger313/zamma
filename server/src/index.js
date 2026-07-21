@@ -15,8 +15,17 @@ import { matchesRouter } from './routes/matches.js';
 import { moderationRouter } from './routes/moderation.js';
 
 const PORT = process.env.PORT || 4000;
+const IS_PROD = process.env.NODE_ENV === 'production';
 const db = openDb(process.env.DB_FILE);
-if (seedIfEmpty(db)) console.log('[seed] Demo-Daten (München & Waldkraiburg) angelegt');
+
+// Demo-Daten NIE unbeabsichtigt in Produktion anlegen — dort nur mit
+// ausdrücklichem ZAMMA_SEED=1 (z. B. für eine Staging-Instanz).
+const seedingAllowed = !IS_PROD || process.env.ZAMMA_SEED === '1';
+if (seedingAllowed) {
+  if (seedIfEmpty(db)) console.log('[seed] Demo-Daten (München & Waldkraiburg) angelegt');
+} else {
+  console.log('[seed] übersprungen (Produktion, ZAMMA_SEED nicht gesetzt)');
+}
 
 // ── Push-Stub: Notification-Zeile + WebSocket + Log (Produktion: FCM/APNs) ──
 const sockets = new Map(); // userId → Set<ws>
@@ -37,8 +46,15 @@ function notify(db_, userId, type, payload, createdAt = new Date().toISOString()
 }
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+// CORS betrifft nur Browser-Clients (die native App ist nicht betroffen).
+// In Produktion muss CORS_ORIGINS gesetzt sein, sonst wird alles geblockt.
+const corsOrigins = (process.env.CORS_ORIGINS ?? '')
+  .split(',').map((s) => s.trim()).filter(Boolean);
+if (IS_PROD && corsOrigins.length === 0) {
+  console.warn('[cors] CORS_ORIGINS nicht gesetzt — Browser-Anfragen werden abgelehnt.');
+}
+app.use(cors(corsOrigins.length ? { origin: corsOrigins } : IS_PROD ? { origin: false } : undefined));
+app.use(express.json({ limit: '64kb' }));
 // Basis-Schutz gegen Abuse (Launch-Checkliste): 240 Requests/Minute pro IP
 const allowRequest = createRateLimiter({ limit: 240, windowMs: 60_000 });
 app.use((req, res, next) => {

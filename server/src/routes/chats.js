@@ -3,6 +3,7 @@ import { makeId } from '../db.js';
 import { getUser } from '../repo.js';
 import { whenLabel, slotLabel, initials } from '../format.js';
 import { getBlockedIds } from '../logic/moderation.js';
+import { LIMITS } from '../logic/limits.js';
 
 function groupSub(db, seriesId) {
   const { c } = db.prepare('SELECT COUNT(*) AS c FROM chat_members WHERE seriesId = ?').get(seriesId);
@@ -105,6 +106,8 @@ export function chatsRouter(db, notify, broadcast) {
   r.post('/:seriesId/messages', (req, res) => {
     const text = String(req.body?.text ?? '').trim();
     if (!text) return res.status(400).json({ error: 'Leere Nachricht' });
+    if (text.length > LIMITS.chatText)
+      return res.status(400).json({ error: `Nachricht zu lang (max. ${LIMITS.chatText} Zeichen)` });
     const member = db.prepare('SELECT * FROM chat_members WHERE seriesId = ? AND userId = ?')
       .get(req.params.seriesId, req.userId);
     if (!member) return res.status(403).json({ error: 'Kein Mitglied dieser Gruppe' });

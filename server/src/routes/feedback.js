@@ -3,6 +3,7 @@ import { makeId } from '../db.js';
 import { getUser, getEvent, getMyParticipation } from '../repo.js';
 import { feedbackWindowState, validTags } from '../logic/feedback.js';
 import { confirmNoShow } from '../logic/noshow.js';
+import { LIMITS, optionalWithinLimit } from '../logic/limits.js';
 import { dateLabel } from '../format.js';
 
 // "Brettspielabend im Jugendhaus" → "der Brettspielabend" (für den Prompt-Banner)
@@ -86,6 +87,8 @@ export function feedbackRouter(db, notify) {
     if (!Number.isInteger(stars) || stars < 1 || stars > 5)
       return res.status(400).json({ error: 'Bewertung (1–5 Sterne) erforderlich' });
     if (!validTags(tags)) return res.status(400).json({ error: 'Unbekannte Attribute' });
+    if (!optionalWithinLimit(comment, LIMITS.feedbackComment))
+      return res.status(400).json({ error: `Kommentar zu lang (max. ${LIMITS.feedbackComment} Zeichen)` });
 
     const dupe = db.prepare('SELECT COUNT(*) AS c FROM feedback WHERE eventId = ? AND fromUserId = ? AND aboutUserId = ?')
       .get(event.id, req.userId, about);

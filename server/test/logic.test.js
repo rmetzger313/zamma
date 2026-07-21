@@ -18,6 +18,7 @@ import { suggestions } from '../src/logic/suggest.js';
 import { computeBadges } from '../src/logic/badges.js';
 import { blockUser, getBlockedIds } from '../src/logic/moderation.js';
 import { validAvailability, getAvailability, setAvailability, WEEKDAYS } from '../src/logic/availability.js';
+import { LIMITS, withinLimit, optionalWithinLimit } from '../src/logic/limits.js';
 
 const H = 3600000, D = 24 * H;
 
@@ -259,6 +260,20 @@ test('Verfügbarkeit: set/get roundtrip, kanonische Wochenreihenfolge', () => {
   // Seed für Anna
   assert.deepEqual(getAvailability(db, 'u_anna'), { days: ['Mo', 'Mi', 'Fr'], slots: ['evening'] });
   assert.equal(WEEKDAYS.length, 7);
+});
+
+// ── Eingabe-Limits ───────────────────────────────────────────────────────
+test('Limits: Pflichtfelder nicht leer und begrenzt, optionale dürfen fehlen', () => {
+  assert.equal(withinLimit('Lauftreff', 20), true);
+  assert.equal(withinLimit('   ', 20), false);            // leer nach Trim
+  assert.equal(withinLimit('x'.repeat(21), 20), false);   // zu lang
+  assert.equal(withinLimit(null, 20), false);
+  assert.equal(withinLimit(42, 20), false);               // kein String
+  assert.equal(optionalWithinLimit(null, 20), true);
+  assert.equal(optionalWithinLimit('', 20), true);
+  assert.equal(optionalWithinLimit('x'.repeat(20), 20), true);
+  assert.equal(optionalWithinLimit('x'.repeat(21), 20), false);
+  assert.ok(LIMITS.chatText >= 500 && LIMITS.eventTitle >= 60);
 });
 
 // ── Rate-Limit ───────────────────────────────────────────────────────────
