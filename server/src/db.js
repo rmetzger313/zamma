@@ -128,7 +128,11 @@ export function openDb(file = join(DATA_DIR, 'zamma.db')) {
     );
     CREATE INDEX IF NOT EXISTS idx_events_series ON events(seriesId);
     CREATE INDEX IF NOT EXISTS idx_events_datetime ON events(datetime);
+    CREATE INDEX IF NOT EXISTS idx_events_host ON events(hostId);
+    CREATE INDEX IF NOT EXISTS idx_events_category ON events(category);
+    CREATE INDEX IF NOT EXISTS idx_events_status ON events(status);
     CREATE INDEX IF NOT EXISTS idx_part_event ON participations(eventId);
+    CREATE INDEX IF NOT EXISTS idx_part_user ON participations(userId);
     CREATE INDEX IF NOT EXISTS idx_msg_series ON chat_messages(seriesId, createdAt);
   `);
   return db;
