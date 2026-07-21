@@ -10,9 +10,11 @@ import {
   NunitoSans_800ExtraBold,
 } from '@expo-google-fonts/nunito-sans';
 import { AppStateProvider } from '../src/state';
-import { colors } from '../src/theme';
+import { ThemeProvider, useColors, useThemeControl } from '../src/theme-context';
 
-export default function RootLayout() {
+function RootInner() {
+  const colors = useColors();
+  const { scheme } = useThemeControl();
   const [fontsLoaded] = useFonts({
     NunitoSans_400Regular,
     NunitoSans_600SemiBold,
@@ -22,14 +24,24 @@ export default function RootLayout() {
   if (!fontsLoaded) return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
 
   return (
-    <AppStateProvider>
-      <StatusBar style="dark" />
+    <>
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <Stack
         screenOptions={{
           headerShown: false,
           contentStyle: { backgroundColor: colors.bg },
         }}
       />
-    </AppStateProvider>
+    </>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <AppStateProvider>
+        <RootInner />
+      </AppStateProvider>
+    </ThemeProvider>
   );
 }

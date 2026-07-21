@@ -4,7 +4,9 @@
 import React, { useEffect } from 'react';
 import { View, Pressable, Animated, StyleSheet } from 'react-native';
 import { T, pressedFx, useReducedMotion, useAnimatedValue } from './ui';
-import { colors, categories } from './theme';
+// Karten-Illustration ist ein Tages-Platzhalter (Produktion: echte Karte) und
+// bleibt in beiden Themes hell — daher feste Farben + Light-Kategorien für vivide Pins.
+import { categories } from './theme';
 
 const PIN_W = 140;
 
@@ -29,7 +31,7 @@ function Pin({ event, onPress }) {
       accessibilityLabel={`${cat.label}: ${event.title}`}
     >
       <View style={[styles.pinLabel, { backgroundColor: cat.color }]}>
-        <T s={11} w={800} c={colors.white}>{cat.label}</T>
+        <T s={11} w={800} c={'#FFFFFF'}>{cat.label}</T>
       </View>
       <View style={[styles.pinTip, { backgroundColor: cat.color }]} />
     </Pressable>
@@ -84,16 +86,16 @@ export function DemoMap({ events, onOpen }) {
         ISAR
       </T>
       <View style={[styles.green, { right: '6%', bottom: '22%', width: '28%', height: '20%', borderRadius: 20 }]} />
-      <T s={10.5} w={700} c={colors.disabled} style={{ position: 'absolute', left: '20%', top: '44%' }}>Maxvorstadt</T>
-      <T s={10.5} w={700} c={colors.disabled} style={{ position: 'absolute', left: '30%', bottom: '24%' }}>Altstadt</T>
-      <T s={10.5} w={700} c={colors.disabled} style={{ position: 'absolute', right: '9%', top: '12%' }}>Waldkraiburg ↗</T>
+      <T s={10.5} w={700} c={'#A8A29E'} style={{ position: 'absolute', left: '20%', top: '44%' }}>Maxvorstadt</T>
+      <T s={10.5} w={700} c={'#A8A29E'} style={{ position: 'absolute', left: '30%', bottom: '24%' }}>Altstadt</T>
+      <T s={10.5} w={700} c={'#A8A29E'} style={{ position: 'absolute', right: '9%', top: '12%' }}>Waldkraiburg ↗</T>
 
       {events.map((e) => (
         <Pin key={e.id} event={e} onPress={() => onOpen(e)} />
       ))}
       <SelfDot />
       <View style={styles.demoTag}>
-        <T s={11} w={700} c={colors.muted}>Kartenansicht (Demo)</T>
+        <T s={11} w={700} c={'#78716C'}>Kartenansicht (Demo)</T>
       </View>
     </View>
   );
@@ -117,11 +119,11 @@ const styles = StyleSheet.create({
     marginLeft: -7, marginTop: -7, alignItems: 'center', justifyContent: 'center',
   },
   selfDot: {
-    width: 14, height: 14, borderRadius: 7, backgroundColor: colors.primary,
-    borderWidth: 3, borderColor: colors.white,
+    width: 14, height: 14, borderRadius: 7, backgroundColor: '#FF6B42',
+    borderWidth: 3, borderColor: '#FFFFFF',
   },
   demoTag: {
-    position: 'absolute', left: 16, bottom: 100, backgroundColor: colors.white,
+    position: 'absolute', left: 16, bottom: 100, backgroundColor: '#FFFFFF',
     borderRadius: 10, paddingVertical: 6, paddingHorizontal: 10,
   },
 });

@@ -6,15 +6,9 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { T, Chip, SectionLabel, PrimaryButton, Row, Input, pressedFx, useReducedMotion, useAnimatedValue } from '../../src/ui';
-import { colors, categories, font, radius, tabBarHeight } from '../../src/theme';
+import { font, radius, tabBarHeight } from '../../src/theme';
+import { useColors, useCategories } from '../../src/theme-context';
 import { api } from '../../src/api';
-
-const inputStyle = {
-  width: '100%',
-  borderWidth: 1.5, borderColor: colors.cardBorder, borderRadius: radius.input,
-  paddingVertical: 13, paddingHorizontal: 14,
-  fontSize: 15, fontFamily: font[600], color: colors.ink, backgroundColor: colors.white,
-};
 
 // Default-Datum: nächste Woche, gleicher Stil wie das Design ("Sa, 25.07.")
 function defaultDate() {
@@ -25,8 +19,16 @@ function defaultDate() {
 }
 
 export default function Erstellen() {
+  const colors = useColors();
+  const categories = useCategories();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const inputStyle = {
+    width: '100%',
+    borderWidth: 1.5, borderColor: colors.cardBorder, borderRadius: radius.input,
+    paddingVertical: 13, paddingHorizontal: 14,
+    fontSize: 15, fontFamily: font[600], color: colors.ink, backgroundColor: colors.surface,
+  };
   const [title, setTitle] = useState('');
   const [cat, setCat] = useState('sport');
   const [skill, setSkill] = useState(1);
@@ -161,7 +163,7 @@ export default function Erstellen() {
           onPress={toggleRec}
           style={{
             flexDirection: 'row', alignItems: 'center', gap: 12,
-            backgroundColor: colors.white, borderWidth: 1.5, borderColor: colors.cardBorder,
+            backgroundColor: colors.surface, borderWidth: 1.5, borderColor: colors.cardBorder,
             borderRadius: 14, paddingVertical: 13, paddingHorizontal: 14,
           }}
           accessibilityRole="switch"

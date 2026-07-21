@@ -5,7 +5,8 @@ import { View, ScrollView, Pressable } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { T, Avatar, BackButton, SectionLabel, PrimaryButton, Row, Card, Input, pressedFx } from '../../src/ui';
-import { colors, font } from '../../src/theme';
+import { font } from '../../src/theme';
+import { useColors } from '../../src/theme-context';
 import { api } from '../../src/api';
 import { useAppState } from '../../src/state';
 
@@ -20,6 +21,7 @@ const CHIPS = [
 ];
 
 export default function FeedbackScreen() {
+  const colors = useColors();
   const { eventId } = useLocalSearchParams();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -141,7 +143,7 @@ export default function FeedbackScreen() {
             width: '100%', minHeight: 80, borderWidth: 1.5, borderColor: colors.cardBorder,
             borderRadius: 14, paddingVertical: 13, paddingHorizontal: 14,
             fontSize: 14.5, fontFamily: font[600], color: colors.ink,
-            backgroundColor: colors.white, textAlignVertical: 'top',
+            backgroundColor: colors.surface, textAlignVertical: 'top',
           }}
         />
         <View style={{ backgroundColor: colors.divider, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 13, marginTop: 12, marginBottom: 16 }}>

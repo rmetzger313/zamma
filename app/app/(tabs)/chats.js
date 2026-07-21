@@ -4,11 +4,12 @@ import { View, ScrollView, Pressable, RefreshControl } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { T, Avatar, Row, pressedFx, Skeleton } from '../../src/ui';
-import { colors } from '../../src/theme';
+import { useColors } from '../../src/theme-context';
 import { api, useApi } from '../../src/api';
 import { useAppState } from '../../src/state';
 
 export default function Chats() {
+  const colors = useColors();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { wsEvent } = useAppState();
@@ -39,7 +40,7 @@ export default function Chats() {
       >
         {chats == null
           ? [1, 2, 3].map((i) => (
-              <Row key={i} gap={12} style={{ backgroundColor: colors.white, borderWidth: 1, borderColor: colors.cardBorder, borderRadius: 16, paddingVertical: 13, paddingHorizontal: 14 }}>
+              <Row key={i} gap={12} style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.cardBorder, borderRadius: 16, paddingVertical: 13, paddingHorizontal: 14 }}>
                 <Skeleton w={44} h={44} r={14} />
                 <View style={{ flex: 1, gap: 8 }}>
                   <Skeleton w="60%" h={14} />
@@ -55,7 +56,7 @@ export default function Chats() {
             style={({ pressed }) => [
               {
                 flexDirection: 'row', gap: 12, alignItems: 'center',
-                backgroundColor: colors.white, borderWidth: 1, borderColor: colors.cardBorder,
+                backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.cardBorder,
                 borderRadius: 16, paddingVertical: 13, paddingHorizontal: 14,
               },
               pressedFx(pressed),

@@ -5,7 +5,8 @@ import { View, ScrollView, Pressable, RefreshControl } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { T, Chip, Row, Avatar, Card, SectionLabel, VerifiedBadge, pressedFx, EventCardSkeleton } from '../../../src/ui';
-import { colors, categories } from '../../../src/theme';
+import { categories } from '../../../src/theme';
+import { useColors } from '../../../src/theme-context';
 import { api, useApi } from '../../../src/api';
 import { useAppState } from '../../../src/state';
 import { EventCard } from '../../../src/EventCard';
@@ -16,6 +17,7 @@ const FILTERS = [{ id: 'alle', label: 'Alle' }].concat(
 );
 
 export default function Entdecken() {
+  const colors = useColors();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [filter, setFilter] = useState('alle');
@@ -54,7 +56,7 @@ export default function Entdecken() {
           style={({ pressed }) => [
             {
               marginLeft: 'auto', borderWidth: 1.5, borderColor: colors.cardBorder,
-              backgroundColor: colors.white, borderRadius: 999,
+              backgroundColor: colors.surface, borderRadius: 999,
               paddingVertical: 8, paddingHorizontal: 14, minHeight: 36, justifyContent: 'center',
             },
             pressedFx(pressed),
@@ -79,9 +81,9 @@ export default function Entdecken() {
               size={13}
               pad={{ paddingVertical: 7, paddingHorizontal: 14 }}
               active={filter === f.id}
-              color={colors.ink}
-              bg={colors.ink}
-              activeStyle={{ backgroundColor: colors.ink, borderColor: colors.ink }}
+              color={colors.inverse}
+              bg={colors.inverse}
+              activeStyle={{ backgroundColor: colors.inverse, borderColor: colors.inverse }}
               onPress={() => setFilter(f.id)}
             />
           ))}
@@ -94,7 +96,7 @@ export default function Entdecken() {
           onPress={() => router.push(`/feedback/${prompt.eventId}`)}
           style={({ pressed }) => [
             {
-              marginHorizontal: 20, marginBottom: 10, backgroundColor: colors.ink,
+              marginHorizontal: 20, marginBottom: 10, backgroundColor: colors.inverse,
               borderRadius: 16, paddingVertical: 13, paddingHorizontal: 16,
               flexDirection: 'row', alignItems: 'center', gap: 12,
             },
@@ -108,13 +110,13 @@ export default function Entdecken() {
               alignItems: 'center', justifyContent: 'center',
             }}
           >
-            <T s={16} w={800} c={colors.ink}>★</T>
+            <T s={16} w={800} c="#1C1917">★</T>
           </View>
           <View style={{ flex: 1, minWidth: 0 }}>
-            <T s={14} w={800} c={colors.white}>{prompt.promptLabel}</T>
+            <T s={14} w={800} c={colors.inverseInk}>{prompt.promptLabel}</T>
             <T s={12} w={600} c={colors.deco}>Dein Feedback hält die Community verlässlich</T>
           </View>
-          <T s={16} w={800} c={colors.amberBright}>→</T>
+          <T s={16} w={800} c={colors.inverseInk}>→</T>
         </Pressable>
       ) : null}
 
@@ -188,7 +190,7 @@ export default function Entdecken() {
           {events && events.length === 0 ? (
             <View
               style={{
-                backgroundColor: colors.white, borderWidth: 1.5, borderStyle: 'dashed',
+                backgroundColor: colors.surface, borderWidth: 1.5, borderStyle: 'dashed',
                 borderColor: colors.dashedBorder, borderRadius: 18,
                 paddingVertical: 30, paddingHorizontal: 22, alignItems: 'center', marginTop: 8,
               }}

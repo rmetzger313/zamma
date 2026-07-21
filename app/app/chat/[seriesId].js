@@ -5,11 +5,13 @@ import { View, ScrollView, Pressable, KeyboardAvoidingView, Platform } from 'rea
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { T, Avatar, BackButton, Row, Input, pressedFx } from '../../src/ui';
-import { colors, font } from '../../src/theme';
+import { font } from '../../src/theme';
+import { useColors } from '../../src/theme-context';
 import { api, useApi } from '../../src/api';
 import { useAppState } from '../../src/state';
 
 export default function ChatThread() {
+  const colors = useColors();
   const { seriesId } = useLocalSearchParams();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -66,7 +68,7 @@ export default function ChatThread() {
         gap={10}
         style={{
           paddingTop: insets.top + 14, paddingHorizontal: 20, paddingBottom: 10,
-          borderBottomWidth: 1, borderBottomColor: colors.cardBorder, backgroundColor: colors.white,
+          borderBottomWidth: 1, borderBottomColor: colors.cardBorder, backgroundColor: colors.surface,
         }}
       >
         <BackButton onPress={() => router.back()} />
@@ -111,7 +113,7 @@ export default function ChatThread() {
               <Avatar initials={m.initials} color={m.color} size={26} textSize={10} />
               <View
                 style={{
-                  backgroundColor: colors.white, borderWidth: 1, borderColor: colors.cardBorder,
+                  backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.cardBorder,
                   borderTopLeftRadius: 16, borderTopRightRadius: 16,
                   borderBottomRightRadius: 16, borderBottomLeftRadius: 4,
                   paddingVertical: 9, paddingHorizontal: 13, flexShrink: 1,
@@ -135,7 +137,7 @@ export default function ChatThread() {
           style={{
             flex: 1, borderWidth: 1.5, borderColor: colors.cardBorder, borderRadius: 999,
             paddingVertical: 12, paddingHorizontal: 16, fontSize: 14.5,
-            fontFamily: font[600], color: colors.ink, backgroundColor: colors.white,
+            fontFamily: font[600], color: colors.ink, backgroundColor: colors.surface,
           }}
         />
         <Pressable

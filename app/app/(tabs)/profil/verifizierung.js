@@ -4,10 +4,11 @@ import { View, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { T, BackButton, Card, Row } from '../../../src/ui';
-import { colors } from '../../../src/theme';
+import { useColors } from '../../../src/theme-context';
 import { api, useApi } from '../../../src/api';
 
 export default function Verifizierung() {
+  const colors = useColors();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { data: v } = useApi(api.verification, []);

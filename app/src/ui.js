@@ -1,7 +1,9 @@
-// Basis-Komponenten des Design-Systems — pixelgenau nach Handoff-Tokens.
+// Basis-Komponenten des Design-Systems. Farben kommen reaktiv aus useColors()
+// (Light/Dark); nur layout-bezogene Styles liegen statisch in `styles`.
 import React, { useEffect, useState } from 'react';
 import { Text, View, Pressable, TextInput, StyleSheet, AccessibilityInfo, Animated } from 'react-native';
-import { colors, font, radius } from './theme';
+import { font, radius } from './theme';
+import { useColors } from './theme-context';
 
 // RN-Web 0.21 kennt useAnimatedValue aus react-native noch nicht —
 // Lazy-Init über useState ist äquivalent (stabil, kein Ref-Zugriff im Render).
@@ -25,18 +27,18 @@ export function useReducedMotion() {
 }
 
 // Tap-Feedback für alle interaktiven Flächen: leichtes Scale + Opacity.
-// Bei „Bewegung reduzieren" nur Opacity (keine Transform-Bewegung).
 export function pressedFx(pressed, reduced = false) {
   if (!pressed) return null;
   return reduced ? { opacity: 0.6 } : { opacity: 0.8, transform: [{ scale: 0.97 }] };
 }
 
 // Text mit Gewicht/Größe/Farbe: <T s={17} w={800}>…</T>
-export function T({ s = 14, w = 600, c = colors.ink, lh, ls, center, style, children, ...rest }) {
+export function T({ s = 14, w = 600, c, lh, ls, center, style, children, ...rest }) {
+  const colors = useColors();
   return (
     <Text
       style={[
-        { fontFamily: font[w], fontSize: s, color: c },
+        { fontFamily: font[w], fontSize: s, color: c ?? colors.ink },
         lh != null && { lineHeight: lh },
         ls != null && { letterSpacing: ls },
         center && { textAlign: 'center' },
@@ -51,6 +53,7 @@ export function T({ s = 14, w = 600, c = colors.ink, lh, ls, center, style, chil
 
 // Abschnitts-Label: 13px/800 UPPERCASE in Muted
 export function SectionLabel({ children, style }) {
+  const colors = useColors();
   return (
     <T s={13} w={800} c={colors.muted} style={[{ marginBottom: 8 }, style]}>
       {children}
@@ -59,12 +62,15 @@ export function SectionLabel({ children, style }) {
 }
 
 // Chip/Pill mit aktiv-Zustand (border 1.5, radius 999)
-export function Chip({ label, active, color = colors.primaryDark, bg = colors.primarySoft,
-  activeStyle, onPress, pad = { paddingVertical: 9, paddingHorizontal: 15 }, size = 14 }) {
+export function Chip({ label, active, color, bg, activeStyle, onPress,
+  pad = { paddingVertical: 9, paddingHorizontal: 15 }, size = 14 }) {
+  const colors = useColors();
+  const activeColor = color ?? colors.primaryDark;
+  const activeBg = bg ?? colors.primarySoft;
   const st = active
-    ? { backgroundColor: bg, borderColor: color }
-    : { backgroundColor: colors.white, borderColor: colors.cardBorder };
-  const textColor = active ? color : colors.secondary;
+    ? { backgroundColor: activeBg, borderColor: activeColor }
+    : { backgroundColor: colors.surface, borderColor: colors.cardBorder };
+  const textColor = active ? activeColor : colors.secondary;
   return (
     <Pressable
       onPress={onPress}
@@ -72,7 +78,7 @@ export function Chip({ label, active, color = colors.primaryDark, bg = colors.pr
       accessibilityRole="button"
       accessibilityState={{ selected: !!active }}
     >
-      <T s={size} w={700} c={active && activeStyle?.backgroundColor ? colors.white : textColor}>{label}</T>
+      <T s={size} w={700} c={active && activeStyle?.backgroundColor ? colors.inverseInk : textColor}>{label}</T>
     </Pressable>
   );
 }
@@ -87,7 +93,8 @@ export function Badge({ label, color, bg, size = 11.5, w = 800, pad = { paddingV
 }
 
 export function Card({ children, style, onPress, radiusSize = radius.cardLg, pad = 16 }) {
-  const base = [styles.card, { borderRadius: radiusSize, padding: pad }, style];
+  const colors = useColors();
+  const base = [styles.card, { backgroundColor: colors.surface, borderColor: colors.cardBorder, borderRadius: radiusSize, padding: pad }, style];
   if (onPress) {
     return (
       <Pressable
@@ -102,8 +109,9 @@ export function Card({ children, style, onPress, radiusSize = radius.cardLg, pad
   return <View style={base}>{children}</View>;
 }
 
-// Avatar mit Initialen (rund oder Kachel)
+// Avatar mit Initialen (rund oder Kachel) — weißer Text auf farbigem Kreis
 export function Avatar({ initials, color, size = 28, square, textSize }) {
+  const colors = useColors();
   return (
     <View
       style={{
@@ -120,6 +128,7 @@ export function Avatar({ initials, color, size = 28, square, textSize }) {
 
 // Skill-Dots „●○○" (Amber, letter-spacing 2)
 export function SkillDots({ level, size = 12 }) {
+  const colors = useColors();
   return (
     <T s={size} w={700} c={colors.amber} ls={2}>
       {'●'.repeat(level) + '○'.repeat(3 - level)}
@@ -129,6 +138,7 @@ export function SkillDots({ level, size = 12 }) {
 
 // Grünes ✓-Badge (verifiziert)
 export function VerifiedBadge({ size = 16 }) {
+  const colors = useColors();
   return (
     <View
       style={{
@@ -146,6 +156,7 @@ export function VerifiedBadge({ size = 16 }) {
 
 // Skeleton-Baustein: pulsierende Platzhalterfläche (statisch bei Reduced-Motion)
 export function Skeleton({ w = '100%', h = 14, r = 8, style }) {
+  const colors = useColors();
   const [dim, setDim] = useState(false);
   const reduced = useReducedMotion();
   useEffect(() => {
@@ -166,8 +177,9 @@ export function Skeleton({ w = '100%', h = 14, r = 8, style }) {
 
 // Skeleton einer Aktivitäts-Card (Feed lädt)
 export function EventCardSkeleton() {
+  const colors = useColors();
   return (
-    <View style={[styles.card, { borderRadius: radius.cardLg, padding: 16, gap: 10 }]}>
+    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.cardBorder, borderRadius: radius.cardLg, padding: 16, gap: 10 }]}>
       <View style={{ flexDirection: 'row', gap: 8 }}>
         <Skeleton w={64} h={22} r={999} />
         <Skeleton w={96} h={22} r={999} />
@@ -182,8 +194,9 @@ export function EventCardSkeleton() {
   );
 }
 
-// Text-Input mit Terracotta-Fokus-Rahmen (Prototyp: input:focus → #e05d38)
+// Text-Input mit Koralle-Fokus-Rahmen
 export function Input({ style, onFocus, onBlur, ...rest }) {
+  const colors = useColors();
   const [focused, setFocused] = useState(false);
   return (
     <TextInput
@@ -196,8 +209,9 @@ export function Input({ style, onFocus, onBlur, ...rest }) {
   );
 }
 
-// Primär-Button: Terracotta, weißer Text, 16px/800, padding 16, radius 16
+// Primär-Button: Koralle, weißer Text, 16px/800, padding 16, radius 16
 export function PrimaryButton({ label, onPress, disabled, bg, fg, style }) {
+  const colors = useColors();
   return (
     <Pressable
       onPress={disabled ? undefined : onPress}
@@ -217,10 +231,11 @@ export function PrimaryButton({ label, onPress, disabled, bg, fg, style }) {
 
 // Runder Back-Button (←)
 export function BackButton({ onPress }) {
+  const colors = useColors();
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [styles.backBtn, pressedFx(pressed)]}
+      style={({ pressed }) => [styles.backBtn, { backgroundColor: colors.surface, borderColor: colors.cardBorder }, pressedFx(pressed)]}
       accessibilityRole="button"
       accessibilityLabel="Zurück"
     >
@@ -246,9 +261,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   card: {
-    backgroundColor: colors.white,
     borderWidth: 1,
-    borderColor: colors.cardBorder,
   },
   primaryBtn: {
     borderRadius: radius.btn,
@@ -259,8 +272,7 @@ const styles = StyleSheet.create({
   },
   backBtn: {
     width: 36, height: 36, borderRadius: 18,
-    borderWidth: 1.5, borderColor: colors.cardBorder,
-    backgroundColor: colors.white,
+    borderWidth: 1.5,
     alignItems: 'center', justifyContent: 'center',
   },
 });

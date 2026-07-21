@@ -2,9 +2,11 @@
 import React from 'react';
 import { View } from 'react-native';
 import { T, Card, Badge, Avatar, SkillDots, VerifiedBadge, Row } from './ui';
-import { colors, categories } from './theme';
+import { useColors, useCategories } from './theme-context';
 
 export function EventCard({ event, onPress }) {
+  const colors = useColors();
+  const categories = useCategories();
   const cat = categories[event.category];
   return (
     <Card onPress={onPress} pad={16}>

@@ -4,11 +4,13 @@ import { View, ScrollView, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { T, PrimaryButton, Row, SkillDots, pressedFx } from '../src/ui';
-import { colors, HOBBIES } from '../src/theme';
+import { HOBBIES } from '../src/theme';
+import { useColors } from '../src/theme-context';
 import { api } from '../src/api';
 import { useAppState } from '../src/state';
 
 export default function Onboarding() {
+  const colors = useColors();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { setOnboarded, reloadMe } = useAppState();
@@ -70,7 +72,7 @@ export default function Onboarding() {
                     borderWidth: 1.5, borderRadius: 999,
                     paddingVertical: 9, paddingHorizontal: 15, minHeight: 36,
                     borderColor: active ? colors.primaryDark : colors.cardBorder,
-                    backgroundColor: active ? colors.primarySoft : colors.white,
+                    backgroundColor: active ? colors.primarySoft : colors.surface,
                   },
                   pressedFx(pressed),
                 ]}
@@ -91,7 +93,7 @@ export default function Onboarding() {
           <Row
             gap={10}
             style={{
-              backgroundColor: colors.white, borderWidth: 1, borderColor: colors.cardBorder,
+              backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.cardBorder,
               borderRadius: 14, paddingVertical: 12, paddingHorizontal: 14, marginBottom: 14,
             }}
           >

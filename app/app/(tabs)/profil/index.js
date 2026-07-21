@@ -4,11 +4,12 @@ import { View, ScrollView, Pressable, RefreshControl } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { T, Avatar, VerifiedBadge, Card, SectionLabel, Row, SkillDots, pressedFx, Skeleton } from '../../../src/ui';
-import { colors } from '../../../src/theme';
+import { useColors, useThemeControl } from '../../../src/theme-context';
 import { api, useApi } from '../../../src/api';
 import { useAppState } from '../../../src/state';
 
 function StatTile({ value, label, highlight }) {
+  const colors = useColors();
   return (
     <View
       style={{
@@ -23,6 +24,8 @@ function StatTile({ value, label, highlight }) {
 }
 
 export default function Profil() {
+  const colors = useColors();
+  const { mode, setMode } = useThemeControl();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { me, reloadMe } = useAppState();
@@ -52,7 +55,7 @@ export default function Profil() {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top + 16, paddingHorizontal: 20 }}>
         <Skeleton w={90} h={20} style={{ marginBottom: 14 }} />
-        <View style={{ backgroundColor: colors.white, borderWidth: 1, borderColor: colors.cardBorder, borderRadius: 18, padding: 18, gap: 14 }}>
+        <View style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.cardBorder, borderRadius: 18, padding: 18, gap: 14 }}>
           <Row gap={14}>
             <Skeleton w={58} h={58} r={29} />
             <View style={{ gap: 8 }}>
@@ -153,7 +156,7 @@ export default function Profil() {
                   {
                     flexDirection: 'row', alignItems: 'center', gap: 6,
                     borderWidth: 1.5, borderColor: colors.cardBorder, borderStyle: 'dashed',
-                    backgroundColor: colors.white, borderRadius: 999,
+                    backgroundColor: colors.surface, borderRadius: 999,
                     paddingVertical: 7, paddingHorizontal: 13, minHeight: 36,
                   },
                   pressedFx(pressed),
@@ -187,6 +190,33 @@ export default function Profil() {
           </Row>
         </>
       ) : null}
+
+      <SectionLabel>DARSTELLUNG</SectionLabel>
+      <Row gap={8} style={{ marginBottom: 18 }}>
+        {[['system', 'System'], ['light', 'Hell'], ['dark', 'Dunkel']].map(([m, lbl]) => {
+          const active = mode === m;
+          return (
+            <Pressable
+              key={m}
+              onPress={() => setMode(m)}
+              style={({ pressed }) => [
+                {
+                  flex: 1, borderWidth: 1.5, borderRadius: 12,
+                  paddingVertical: 10, minHeight: 44, alignItems: 'center', justifyContent: 'center',
+                  borderColor: active ? colors.primary : colors.cardBorder,
+                  backgroundColor: active ? colors.primarySoft : colors.surface,
+                },
+                pressedFx(pressed),
+              ]}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
+              accessibilityLabel={`Darstellung: ${lbl}`}
+            >
+              <T s={13} w={700} c={active ? colors.primaryDark : colors.secondary}>{lbl}</T>
+            </Pressable>
+          );
+        })}
+      </Row>
 
       <SectionLabel>LETZTES FEEDBACK</SectionLabel>
       <View style={{ gap: 9 }}>

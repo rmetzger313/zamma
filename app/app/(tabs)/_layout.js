@@ -5,7 +5,8 @@ import { View, Pressable } from 'react-native';
 import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { T, pressedFx } from '../../src/ui';
-import { colors, tabBarBottomPad } from '../../src/theme';
+import { tabBarBottomPad } from '../../src/theme';
+import { useColors } from '../../src/theme-context';
 
 const TAB_META = {
   entdecken: { label: 'Entdecken', glyph: '', shape: 'circle' },
@@ -15,6 +16,7 @@ const TAB_META = {
 };
 
 function TabIcon({ name, active }) {
+  const colors = useColors();
   const meta = TAB_META[name];
   const isCreate = name === 'erstellen';
   const bg = active ? (isCreate ? colors.primary : colors.primarySoft) : 'transparent';
@@ -42,6 +44,7 @@ function TabIcon({ name, active }) {
 }
 
 function ZammaTabBar({ state, navigation }) {
+  const colors = useColors();
   const insets = useSafeAreaInsets();
   return (
     <View
@@ -79,6 +82,7 @@ function ZammaTabBar({ state, navigation }) {
 }
 
 export default function TabsLayout() {
+  const colors = useColors();
   return (
     <Tabs
       tabBar={(props) => <ZammaTabBar {...props} />}

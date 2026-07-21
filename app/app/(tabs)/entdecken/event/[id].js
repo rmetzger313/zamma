@@ -6,11 +6,13 @@ import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { T, Badge, Card, Avatar, SkillDots, VerifiedBadge, BackButton, PrimaryButton, Row, pressedFx } from '../../../../src/ui';
-import { colors, categories, tabBarHeight } from '../../../../src/theme';
+import { tabBarHeight } from '../../../../src/theme';
+import { useColors, useCategories } from '../../../../src/theme-context';
 import { api, useApi } from '../../../../src/api';
 import { useAppState } from '../../../../src/state';
 
 function InfoRow({ label, children, last }) {
+  const colors = useColors();
   return (
     <Row
       gap={10}
@@ -27,6 +29,8 @@ function InfoRow({ label, children, last }) {
 }
 
 export default function EventDetail() {
+  const colors = useColors();
+  const categories = useCategories();
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -203,7 +207,7 @@ export default function EventDetail() {
               key={p.id}
               gap={7}
               style={{
-                backgroundColor: colors.white, borderWidth: 1, borderColor: colors.cardBorder,
+                backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.cardBorder,
                 borderRadius: 999, paddingVertical: 5, paddingRight: 12, paddingLeft: 5,
               }}
             >
@@ -240,7 +244,7 @@ export default function EventDetail() {
       {/* Host-Menü: Melden & Blockieren (Trust & Safety) */}
       <Modal visible={!!hostMenu} transparent statusBarTranslucent animationType="fade" onRequestClose={() => setHostMenu(null)}>
         <Pressable style={{ flex: 1, backgroundColor: colors.overlay, justifyContent: 'flex-end' }} onPress={() => setHostMenu(null)}>
-          <Pressable onPress={() => {}} style={{ backgroundColor: colors.white, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 22, paddingBottom: 34 }}>
+          <Pressable onPress={() => {}} style={{ backgroundColor: colors.surface, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 22, paddingBottom: 34 }}>
             {hostMenu === 'menu' ? (
               <>
                 <T s={15} w={800} style={{ marginBottom: 14 }}>{event.host.name}</T>
@@ -301,7 +305,7 @@ export default function EventDetail() {
             alignItems: 'center', justifyContent: 'center', padding: 24,
           }}
         >
-          <View style={{ backgroundColor: colors.white, borderRadius: 20, padding: 22, width: '100%', maxWidth: 320 }}>
+          <View style={{ backgroundColor: colors.surface, borderRadius: 20, padding: 22, width: '100%', maxWidth: 320 }}>
             <T s={17} w={800} style={{ marginBottom: 8 }}>Wirklich absagen?</T>
             <T s={13.5} w={600} c={colors.secondary} lh={20.25} style={{ marginBottom: 10 }}>
               Absagen weniger als 24 h vor dem Treffen senken deinen Zuverlässigkeits-Score. Die Gruppe wird automatisch benachrichtigt.
