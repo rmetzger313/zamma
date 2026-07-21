@@ -1,7 +1,28 @@
 // Basis-Komponenten des Design-Systems — pixelgenau nach Handoff-Tokens.
-import React, { useState } from 'react';
-import { Text, View, Pressable, TextInput, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Text, View, Pressable, TextInput, StyleSheet, AccessibilityInfo } from 'react-native';
 import { colors, font, radius } from './theme';
+
+// System-Einstellung „Bewegung reduzieren" (iOS/Android/Web via matchMedia)
+export function useReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    AccessibilityInfo.isReduceMotionEnabled?.()
+      .then((v) => alive && setReduced(!!v))
+      .catch(() => {});
+    const sub = AccessibilityInfo.addEventListener?.('reduceMotionChanged', setReduced);
+    return () => { alive = false; sub?.remove?.(); };
+  }, []);
+  return reduced;
+}
+
+// Tap-Feedback für alle interaktiven Flächen: leichtes Scale + Opacity.
+// Bei „Bewegung reduzieren" nur Opacity (keine Transform-Bewegung).
+export function pressedFx(pressed, reduced = false) {
+  if (!pressed) return null;
+  return reduced ? { opacity: 0.6 } : { opacity: 0.8, transform: [{ scale: 0.97 }] };
+}
 
 // Text mit Gewicht/Größe/Farbe: <T s={17} w={800}>…</T>
 export function T({ s = 14, w = 600, c = colors.ink, lh, ls, center, style, children, ...rest }) {
@@ -40,7 +61,7 @@ export function Chip({ label, active, color = colors.primaryDark, bg = colors.pr
   return (
     <Pressable
       onPress={onPress}
-      style={[styles.chip, pad, st, active && activeStyle]}
+      style={({ pressed }) => [styles.chip, pad, st, active && activeStyle, pressedFx(pressed)]}
       accessibilityRole="button"
       accessibilityState={{ selected: !!active }}
     >
@@ -62,7 +83,11 @@ export function Card({ children, style, onPress, radiusSize = radius.cardLg, pad
   const base = [styles.card, { borderRadius: radiusSize, padding: pad }, style];
   if (onPress) {
     return (
-      <Pressable onPress={onPress} style={base} accessibilityRole="button">
+      <Pressable
+        onPress={onPress}
+        style={({ pressed }) => [...base, pressedFx(pressed)]}
+        accessibilityRole="button"
+      >
         {children}
       </Pressable>
     );
@@ -131,10 +156,11 @@ export function PrimaryButton({ label, onPress, disabled, bg, fg, style }) {
   return (
     <Pressable
       onPress={disabled ? undefined : onPress}
-      style={[
+      style={({ pressed }) => [
         styles.primaryBtn,
         { backgroundColor: bg ?? (disabled ? colors.btnDisabledBg : colors.primary) },
         style,
+        !disabled && pressedFx(pressed),
       ]}
       accessibilityRole="button"
       accessibilityState={{ disabled: !!disabled }}
@@ -147,7 +173,12 @@ export function PrimaryButton({ label, onPress, disabled, bg, fg, style }) {
 // Runder Back-Button (←)
 export function BackButton({ onPress }) {
   return (
-    <Pressable onPress={onPress} style={styles.backBtn} accessibilityRole="button" accessibilityLabel="Zurück">
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.backBtn, pressedFx(pressed)]}
+      accessibilityRole="button"
+      accessibilityLabel="Zurück"
+    >
       <T s={16} c={colors.ink}>←</T>
     </Pressable>
   );

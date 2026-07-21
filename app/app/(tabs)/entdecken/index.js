@@ -4,7 +4,7 @@ import React, { useCallback, useState } from 'react';
 import { View, ScrollView, Pressable } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { T, Chip, Row, Avatar, Card, SectionLabel, VerifiedBadge } from '../../../src/ui';
+import { T, Chip, Row, Avatar, Card, SectionLabel, VerifiedBadge, pressedFx } from '../../../src/ui';
 import { colors, categories } from '../../../src/theme';
 import { api, useApi } from '../../../src/api';
 import { useAppState } from '../../../src/state';
@@ -45,11 +45,14 @@ export default function Entdecken() {
         </View>
         <Pressable
           onPress={() => setView((v) => (v === 'list' ? 'map' : 'list'))}
-          style={{
-            marginLeft: 'auto', borderWidth: 1.5, borderColor: colors.cardBorder,
-            backgroundColor: colors.white, borderRadius: 999,
-            paddingVertical: 8, paddingHorizontal: 14, minHeight: 36, justifyContent: 'center',
-          }}
+          style={({ pressed }) => [
+            {
+              marginLeft: 'auto', borderWidth: 1.5, borderColor: colors.cardBorder,
+              backgroundColor: colors.white, borderRadius: 999,
+              paddingVertical: 8, paddingHorizontal: 14, minHeight: 36, justifyContent: 'center',
+            },
+            pressedFx(pressed),
+          ]}
           accessibilityRole="button"
         >
           <T s={13} w={700}>{view === 'list' ? '⊞ Karte' : '☰ Liste'}</T>
@@ -83,11 +86,14 @@ export default function Entdecken() {
       {prompt ? (
         <Pressable
           onPress={() => router.push(`/feedback/${prompt.eventId}`)}
-          style={{
-            marginHorizontal: 20, marginBottom: 10, backgroundColor: colors.ink,
-            borderRadius: 16, paddingVertical: 13, paddingHorizontal: 16,
-            flexDirection: 'row', alignItems: 'center', gap: 12,
-          }}
+          style={({ pressed }) => [
+            {
+              marginHorizontal: 20, marginBottom: 10, backgroundColor: colors.ink,
+              borderRadius: 16, paddingVertical: 13, paddingHorizontal: 16,
+              flexDirection: 'row', alignItems: 'center', gap: 12,
+            },
+            pressedFx(pressed),
+          ]}
           accessibilityRole="button"
         >
           <View

@@ -3,7 +3,7 @@ import React, { useCallback } from 'react';
 import { View, ScrollView, Pressable } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { T, Avatar, VerifiedBadge, Card, SectionLabel, Row, SkillDots } from '../../../src/ui';
+import { T, Avatar, VerifiedBadge, Card, SectionLabel, Row, SkillDots, pressedFx } from '../../../src/ui';
 import { colors } from '../../../src/theme';
 import { api, useApi } from '../../../src/api';
 import { useAppState } from '../../../src/state';
@@ -70,11 +70,14 @@ export default function Profil() {
 
       <Pressable
         onPress={() => router.push('/(tabs)/profil/verifizierung')}
-        style={{
-          backgroundColor: colors.successSoft, borderRadius: 16,
-          paddingVertical: 13, paddingHorizontal: 15, marginBottom: 14,
-          flexDirection: 'row', gap: 10, alignItems: 'center',
-        }}
+        style={({ pressed }) => [
+          {
+            backgroundColor: colors.successSoft, borderRadius: 16,
+            paddingVertical: 13, paddingHorizontal: 15, marginBottom: 14,
+            flexDirection: 'row', gap: 10, alignItems: 'center',
+          },
+          pressedFx(pressed),
+        ]}
         accessibilityRole="button"
       >
         <View
@@ -116,12 +119,15 @@ export default function Profil() {
               <Pressable
                 key={s.hobby}
                 onPress={() => addHobby(s.hobby)}
-                style={{
-                  flexDirection: 'row', alignItems: 'center', gap: 6,
-                  borderWidth: 1.5, borderColor: colors.cardBorder, borderStyle: 'dashed',
-                  backgroundColor: colors.white, borderRadius: 999,
-                  paddingVertical: 7, paddingHorizontal: 13, minHeight: 36,
-                }}
+                style={({ pressed }) => [
+                  {
+                    flexDirection: 'row', alignItems: 'center', gap: 6,
+                    borderWidth: 1.5, borderColor: colors.cardBorder, borderStyle: 'dashed',
+                    backgroundColor: colors.white, borderRadius: 999,
+                    paddingVertical: 7, paddingHorizontal: 13, minHeight: 36,
+                  },
+                  pressedFx(pressed),
+                ]}
                 accessibilityRole="button"
                 accessibilityLabel={`${s.hobby} hinzufügen — weil du ${s.because} magst`}
               >

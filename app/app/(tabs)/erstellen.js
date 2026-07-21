@@ -5,7 +5,7 @@ import { View, ScrollView, Pressable, Animated, useAnimatedValue } from 'react-n
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { T, Chip, SectionLabel, PrimaryButton, Row, Input } from '../../src/ui';
+import { T, Chip, SectionLabel, PrimaryButton, Row, Input, pressedFx, useReducedMotion } from '../../src/ui';
 import { colors, categories, font, radius, tabBarHeight } from '../../src/theme';
 import { api } from '../../src/api';
 
@@ -38,9 +38,14 @@ export default function Erstellen() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const knob = useAnimatedValue(0);
+  const reduced = useReducedMotion();
 
   const toggleRec = () => {
-    Animated.timing(knob, { toValue: rec ? 0 : 1, duration: 200, useNativeDriver: false }).start();
+    Animated.timing(knob, {
+      toValue: rec ? 0 : 1,
+      duration: reduced ? 0 : 200,
+      useNativeDriver: false,
+    }).start();
     setRec(!rec);
   };
 
@@ -112,13 +117,16 @@ export default function Erstellen() {
                 <Pressable
                   key={n}
                   onPress={() => setSkill(n)}
-                  style={{
-                    flex: 1, borderWidth: 1.5, borderRadius: 12,
-                    paddingVertical: 10, paddingHorizontal: 4, minHeight: 44,
-                    alignItems: 'center', justifyContent: 'center',
-                    borderColor: active ? colors.amber : colors.cardBorder,
-                    backgroundColor: active ? colors.amberSoft : colors.white,
-                  }}
+                  style={({ pressed }) => [
+                    {
+                      flex: 1, borderWidth: 1.5, borderRadius: 12,
+                      paddingVertical: 10, paddingHorizontal: 4, minHeight: 44,
+                      alignItems: 'center', justifyContent: 'center',
+                      borderColor: active ? colors.amber : colors.cardBorder,
+                      backgroundColor: active ? colors.amberSoft : colors.white,
+                    },
+                    pressedFx(pressed),
+                  ]}
                   accessibilityRole="button"
                   accessibilityState={{ selected: active }}
                 >

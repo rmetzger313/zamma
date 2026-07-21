@@ -4,7 +4,7 @@ import React from 'react';
 import { View, Pressable } from 'react-native';
 import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { T } from '../../src/ui';
+import { T, pressedFx } from '../../src/ui';
 import { colors, tabBarBottomPad } from '../../src/theme';
 
 const TAB_META = {
@@ -61,7 +61,10 @@ function ZammaTabBar({ state, navigation }) {
           <Pressable
             key={route.key}
             onPress={() => navigation.navigate(route.name)}
-            style={{ flex: 1, alignItems: 'center', gap: 3, paddingVertical: 4, minHeight: 44 }}
+            style={({ pressed }) => [
+              { flex: 1, alignItems: 'center', gap: 3, paddingVertical: 4, minHeight: 44 },
+              pressedFx(pressed),
+            ]}
             accessibilityRole="tab"
             accessibilityState={{ selected: active }}
             accessibilityLabel={meta.label}

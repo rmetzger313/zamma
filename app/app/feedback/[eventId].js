@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { View, ScrollView, Pressable } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { T, Avatar, BackButton, SectionLabel, PrimaryButton, Row, Card, Input } from '../../src/ui';
+import { T, Avatar, BackButton, SectionLabel, PrimaryButton, Row, Card, Input, pressedFx } from '../../src/ui';
 import { colors, font } from '../../src/theme';
 import { api } from '../../src/api';
 import { useAppState } from '../../src/state';
@@ -90,7 +90,10 @@ export default function FeedbackScreen() {
             <Pressable
               key={n}
               onPress={() => setStars(n)}
-              style={{ padding: 2, minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}
+              style={({ pressed }) => [
+                { padding: 2, minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
+                pressedFx(pressed),
+              ]}
               accessibilityRole="button"
               accessibilityLabel={`${n} Sterne`}
             >
@@ -109,12 +112,15 @@ export default function FeedbackScreen() {
               <Pressable
                 key={c.tag}
                 onPress={() => toggleTag(c.tag)}
-                style={{
-                  borderWidth: 1.5, borderRadius: 999, paddingVertical: 8, paddingHorizontal: 14,
-                  minHeight: 36, justifyContent: 'center',
-                  borderColor: active ? color : colors.cardBorder,
-                  backgroundColor: active ? bg : colors.white,
-                }}
+                style={({ pressed }) => [
+                  {
+                    borderWidth: 1.5, borderRadius: 999, paddingVertical: 8, paddingHorizontal: 14,
+                    minHeight: 36, justifyContent: 'center',
+                    borderColor: active ? color : colors.cardBorder,
+                    backgroundColor: active ? bg : colors.white,
+                  },
+                  pressedFx(pressed),
+                ]}
                 accessibilityRole="button"
                 accessibilityState={{ selected: active }}
               >

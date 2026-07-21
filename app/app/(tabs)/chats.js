@@ -3,7 +3,7 @@ import React, { useCallback, useEffect } from 'react';
 import { View, ScrollView, Pressable } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { T, Avatar, Row } from '../../src/ui';
+import { T, Avatar, Row, pressedFx } from '../../src/ui';
 import { colors } from '../../src/theme';
 import { api, useApi } from '../../src/api';
 import { useAppState } from '../../src/state';
@@ -32,11 +32,14 @@ export default function Chats() {
           <Pressable
             key={c.seriesId}
             onPress={() => router.push(`/chat/${c.seriesId}`)}
-            style={{
-              flexDirection: 'row', gap: 12, alignItems: 'center',
-              backgroundColor: colors.white, borderWidth: 1, borderColor: colors.cardBorder,
-              borderRadius: 16, paddingVertical: 13, paddingHorizontal: 14,
-            }}
+            style={({ pressed }) => [
+              {
+                flexDirection: 'row', gap: 12, alignItems: 'center',
+                backgroundColor: colors.white, borderWidth: 1, borderColor: colors.cardBorder,
+                borderRadius: 16, paddingVertical: 13, paddingHorizontal: 14,
+              },
+              pressedFx(pressed),
+            ]}
             accessibilityRole="button"
           >
             <Avatar initials={c.initials} color={c.color} size={44} square textSize={16} />

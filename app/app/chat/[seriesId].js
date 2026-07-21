@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, ScrollView, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { T, Avatar, BackButton, Row, Input } from '../../src/ui';
+import { T, Avatar, BackButton, Row, Input, pressedFx } from '../../src/ui';
 import { colors, font } from '../../src/theme';
 import { api, useApi } from '../../src/api';
 import { useAppState } from '../../src/state';
@@ -127,10 +127,13 @@ export default function ChatThread() {
         />
         <Pressable
           onPress={send}
-          style={{
-            width: 46, height: 46, borderRadius: 23, backgroundColor: colors.primary,
-            alignItems: 'center', justifyContent: 'center',
-          }}
+          style={({ pressed }) => [
+            {
+              width: 46, height: 46, borderRadius: 23, backgroundColor: colors.primary,
+              alignItems: 'center', justifyContent: 'center',
+            },
+            pressedFx(pressed),
+          ]}
           accessibilityRole="button"
           accessibilityLabel="Senden"
         >

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { View, ScrollView, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { T, PrimaryButton, Row, SkillDots } from '../src/ui';
+import { T, PrimaryButton, Row, SkillDots, pressedFx } from '../src/ui';
 import { colors, HOBBIES } from '../src/theme';
 import { api } from '../src/api';
 import { useAppState } from '../src/state';
@@ -64,13 +64,16 @@ export default function Onboarding() {
               <Pressable
                 key={name}
                 onPress={() => cycle(name)}
-                style={{
-                  flexDirection: 'row', alignItems: 'center', gap: 6,
-                  borderWidth: 1.5, borderRadius: 999,
-                  paddingVertical: 9, paddingHorizontal: 15, minHeight: 36,
-                  borderColor: active ? colors.primaryDark : colors.cardBorder,
-                  backgroundColor: active ? colors.primarySoft : colors.white,
-                }}
+                style={({ pressed }) => [
+                  {
+                    flexDirection: 'row', alignItems: 'center', gap: 6,
+                    borderWidth: 1.5, borderRadius: 999,
+                    paddingVertical: 9, paddingHorizontal: 15, minHeight: 36,
+                    borderColor: active ? colors.primaryDark : colors.cardBorder,
+                    backgroundColor: active ? colors.primarySoft : colors.white,
+                  },
+                  pressedFx(pressed),
+                ]}
                 accessibilityRole="button"
                 accessibilityState={{ selected: active }}
                 accessibilityLabel={active ? `${name}, Level ${lvl} von 3` : name}

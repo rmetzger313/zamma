@@ -3,7 +3,7 @@
 // Pin-Positionen kommen dann aus einer Geo-Projektion statt aus mapX/mapY.
 import React, { useEffect } from 'react';
 import { View, Pressable, Animated, StyleSheet, useAnimatedValue } from 'react-native';
-import { T } from './ui';
+import { T, pressedFx, useReducedMotion } from './ui';
 import { colors, categories } from './theme';
 
 const PIN_W = 140;
@@ -13,15 +13,18 @@ function Pin({ event, onPress }) {
   return (
     <Pressable
       onPress={onPress}
-      style={{
-        position: 'absolute',
-        left: event.mapX ?? '50%',
-        top: event.mapY ?? '36%',
-        width: PIN_W,
-        marginLeft: -PIN_W / 2,
-        marginTop: -34,
-        alignItems: 'center',
-      }}
+      style={({ pressed }) => [
+        {
+          position: 'absolute',
+          left: event.mapX ?? '50%',
+          top: event.mapY ?? '36%',
+          width: PIN_W,
+          marginLeft: -PIN_W / 2,
+          marginTop: -34,
+          alignItems: 'center',
+        },
+        pressedFx(pressed),
+      ]}
       accessibilityRole="button"
       accessibilityLabel={`${cat.label}: ${event.title}`}
     >
@@ -33,10 +36,12 @@ function Pin({ event, onPress }) {
   );
 }
 
-// Eigener Standort: pulsierender Terracotta-Punkt
+// Eigener Standort: pulsierender Terracotta-Punkt (statisch bei „Bewegung reduzieren")
 function SelfDot() {
   const pulse = useAnimatedValue(0);
+  const reduced = useReducedMotion();
   useEffect(() => {
+    if (reduced) return undefined;
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(pulse, { toValue: 1, duration: 1200, useNativeDriver: false }),
@@ -45,7 +50,7 @@ function SelfDot() {
     );
     loop.start();
     return () => loop.stop();
-  }, [pulse]);
+  }, [pulse, reduced]);
   const ring = pulse.interpolate({ inputRange: [0, 1], outputRange: [4, 9] });
   return (
     <View style={styles.selfWrap} pointerEvents="none">

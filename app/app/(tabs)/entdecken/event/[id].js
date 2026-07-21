@@ -5,7 +5,7 @@ import { View, ScrollView, Pressable, Modal } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { T, Badge, Card, Avatar, SkillDots, VerifiedBadge, BackButton, PrimaryButton, Row } from '../../../../src/ui';
+import { T, Badge, Card, Avatar, SkillDots, VerifiedBadge, BackButton, PrimaryButton, Row, pressedFx } from '../../../../src/ui';
 import { colors, categories, tabBarHeight } from '../../../../src/theme';
 import { api, useApi } from '../../../../src/api';
 import { useAppState } from '../../../../src/state';
@@ -168,11 +168,14 @@ export default function EventDetail() {
               <T s={12.5} w={600} c={colors.muted}>{event.host.repLabel}</T>
             </View>
             <Pressable
-              style={{
-                marginLeft: 'auto', borderWidth: 1.5, borderColor: colors.cardBorder,
-                backgroundColor: colors.bg, borderRadius: 999,
-                paddingVertical: 7, paddingHorizontal: 13, minHeight: 36, justifyContent: 'center',
-              }}
+              style={({ pressed }) => [
+                {
+                  marginLeft: 'auto', borderWidth: 1.5, borderColor: colors.cardBorder,
+                  backgroundColor: colors.bg, borderRadius: 999,
+                  paddingVertical: 7, paddingHorizontal: 13, minHeight: 36, justifyContent: 'center',
+                },
+                pressedFx(pressed),
+              ]}
               accessibilityRole="button"
             >
               <T s={12.5} w={800}>Profil</T>
@@ -180,7 +183,10 @@ export default function EventDetail() {
             {!event.isHost ? (
               <Pressable
                 onPress={() => setHostMenu('menu')}
-                style={{ minWidth: 36, minHeight: 36, alignItems: 'center', justifyContent: 'center' }}
+                style={({ pressed }) => [
+                  { minWidth: 36, minHeight: 36, alignItems: 'center', justifyContent: 'center' },
+                  pressedFx(pressed),
+                ]}
                 accessibilityRole="button"
                 accessibilityLabel="Mehr Optionen"
               >
@@ -318,20 +324,26 @@ export default function EventDetail() {
             <Row gap={8}>
               <Pressable
                 onPress={() => setModal(false)}
-                style={{
-                  flex: 1, backgroundColor: colors.bg, borderWidth: 1.5, borderColor: colors.cardBorder,
-                  borderRadius: 12, padding: 12, minHeight: 44, alignItems: 'center', justifyContent: 'center',
-                }}
+                style={({ pressed }) => [
+                  {
+                    flex: 1, backgroundColor: colors.bg, borderWidth: 1.5, borderColor: colors.cardBorder,
+                    borderRadius: 12, padding: 12, minHeight: 44, alignItems: 'center', justifyContent: 'center',
+                  },
+                  pressedFx(pressed),
+                ]}
                 accessibilityRole="button"
               >
                 <T s={14} w={800}>Doch dabei</T>
               </Pressable>
               <Pressable
                 onPress={confirmCancel}
-                style={{
-                  flex: 1, backgroundColor: colors.primaryDark, borderRadius: 12, padding: 12,
-                  minHeight: 44, alignItems: 'center', justifyContent: 'center',
-                }}
+                style={({ pressed }) => [
+                  {
+                    flex: 1, backgroundColor: colors.primaryDark, borderRadius: 12, padding: 12,
+                    minHeight: 44, alignItems: 'center', justifyContent: 'center',
+                  },
+                  pressedFx(pressed),
+                ]}
                 accessibilityRole="button"
               >
                 <T s={14} w={800} c={colors.white}>Absagen</T>
