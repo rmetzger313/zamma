@@ -7,10 +7,11 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "env": { "EXPO_PUBLIC_API_URL": "http://localhost:4000" }
+      "android": { "buildType": "apk" }
     },
     "preview": {
       "distribution": "internal",
+      "android": { "buildType": "apk" },
       "env": { "EXPO_PUBLIC_API_URL": "https://staging-api.example.invalid" }
     },
     "production": {

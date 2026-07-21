@@ -13,9 +13,11 @@
       "backgroundColor": "#FAFAF9"
     },
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "com.zamma.app"
     },
     "android": {
+      "package": "com.zamma.app",
       "adaptiveIcon": {
         "backgroundColor": "#FAFAF9",
         "foregroundImage": "./assets/android-icon-foreground.png",
